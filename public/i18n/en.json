@@ -1,7 +1,22 @@
 {
-  "app": {
-    "hello": "Hello Word Wonder",
-    "title": "Translation Demo",
-    "test": "Test Success"
+  "home": {
+    "title": "Word Wonder",
+    "subtitle": "Learn to speak like a star!",
+    "upload_image": "Upload an Image",
+    "take_photo": "Take a photo",
+    "section_stories": "or try a story",
+    "upload_card": {
+      "title": "Upload an Image",
+      "upload_btn": "Tap to upload an image",
+      "camera_btn": "or take a photo"
+    }
+  },
+  "common": {
+    "nav": {
+      "home": "Home",
+      "learn": "Learn",
+      "favorites": "My Words",
+      "settings": "Settings"
+    }
   }
 }

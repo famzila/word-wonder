@@ -5,7 +5,7 @@ import { LucideAngularModule, House } from 'lucide-angular';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TranslatePipe, LucideAngularModule],
+  imports: [RouterOutlet, LucideAngularModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
