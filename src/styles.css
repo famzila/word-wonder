@@ -1,2 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@200..1000&display=swap');
+
 @import "tailwindcss";
-@plugin "daisyui";
+
+@plugin "daisyui" {
+    themes: wordwonder --default;
+}
+
+@plugin "daisyui/theme" {
+    name: wordwonder;
+    default: true;
+    color-scheme: light;
+
+    /* Colors - HSL Values from Spec */
+    --color-primary: hsl(16 90% 60%);
+    /* Coral */
+    --color-primary-content: hsl(0 0% 100%);
+
+    --color-secondary: hsl(174 60% 50%);
+    /* Teal */
+    --color-secondary-content: hsl(0 0% 100%);
+
+    --color-accent: hsl(45 95% 60%);
+    /* Sunny Yellow */
+    --color-accent-content: hsl(220 25% 20%);
+
+    --color-neutral: hsl(220 25% 20%);
+    /* Dark Blue-Gray */
+    --color-neutral-content: hsl(0 0% 100%);
+
+    --color-base-100: hsl(45 100% 96%);
+    /* Warm Cream BG */
+    --color-base-200: hsl(0 0% 100%);
+    /* Pure White Surface */
+    --color-base-300: hsl(45 40% 90%);
+    /* Muted BG */
+    --color-base-content: hsl(220 25% 20%);
+    /* Dark Blue-Gray Text */
+
+    /* Functional Colors */
+    --color-info: hsl(200 80% 70%);
+    /* Sky Blue */
+    --color-info-content: hsl(220 25% 20%);
+    --color-success: hsl(150 50% 70%);
+    /* Mint */
+    --color-success-content: hsl(220 25% 20%);
+    --color-warning: hsl(45 95% 60%);
+    /* Match Accent */
+    --color-warning-content: hsl(220 25% 20%);
+    --color-error: hsl(0 70% 60%);
+    /* Soft Red - approx check */
+    --color-error-content: hsl(0 0% 100%);
+
+    /* Radius - Mapped from Spec */
+    --radius-selector: 2rem;
+    /* Badges/Pills: rounded-full (approx 2rem usually covers it) */
+    --radius-field: 1rem;
+    /* Buttons/Inputs: 16px */
+    --radius-box: 1rem;
+    /* Cards: 16px (rounded-2xl) */
+
+    /* Sizing */
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+
+    /* Border */
+    --border: 2px;
+
+    /* Effects */
+    --depth: 1;
+    --noise: 0;
+}
+
+@theme {
+    --font-heading: 'Fredoka', sans-serif;
+    --font-sans: 'Nunito', sans-serif;
+
+    /* Custom Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(220 25% 20% / 0.1);
+    --shadow-card: 0 8px 30px -8px hsl(220 25% 20% / 0.15);
+    --shadow-button: 0 4px 14px -4px hsl(16 90% 60% / 0.4);
+    --shadow-bounce: 0 10px 40px -10px hsl(16 90% 60% / 0.3);
+}
+
+/* Page Background Gradient */
+body {
+    background: linear-gradient(180deg, hsl(45 100% 96%) 0%, hsl(45 80% 92%) 100%);
+    min-height: 100vh;
+}
+
+/* Custom Utilities */
+.bg-gradient-fun {
+    background: linear-gradient(135deg, hsl(16 90% 60%) 0%, hsl(45 95% 60%) 100%);
+}
+
+.bg-gradient-cool {
+    background: linear-gradient(135deg, hsl(174 60% 50%) 0%, hsl(200 80% 70%) 100%);
+}
+
+/* Animation Utilities */
+.hover-bounce {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hover-bounce:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-bounce);
+}
+
+.card-shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-shine::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(to bottom right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 60%,
+            rgba(255, 255, 255, 0) 100%);
+    transform: rotate(30deg);
+    transition: transform 0.5s;
+    pointer-events: none;
+}
+
+.card-shine:hover::after {
+    transform: rotate(30deg) translate(20%, 20%);
+}
