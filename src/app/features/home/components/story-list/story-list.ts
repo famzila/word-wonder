@@ -1,4 +1,4 @@
-import { Component, output } from '@angular/core';
+import { Component, output, input } from '@angular/core';
 import { LucideAngularModule, BookOpen } from 'lucide-angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { Story } from '../../../../shared/models/word.model';
@@ -14,7 +14,7 @@ import { Story } from '../../../../shared/models/word.model';
       </div>
 
       <div class="flex flex-col gap-3">
-        @for (story of stories; track story.id) {
+        @for (story of stories(); track story.id) {
             <button (click)="selectStory.emit(story)" class="card card-side bg-white shadow-sm border border-base-200 p-2 hover:scale-[1.02] active:scale-[0.98] transition-all text-left group">
                 <figure [class]="'w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 ml-2 my-auto transition-colors ' + (story.themeColor || 'bg-orange-100 text-orange-500')">
                     <!-- Placeholder icon if no image -->
@@ -37,32 +37,10 @@ import { Story } from '../../../../shared/models/word.model';
   styles: []
 })
 export class StoryList {
+  // Inputs/Outputs
+  stories = input.required<Story[]>();
   selectStory = output<Story>();
   
+  // Other properties
   readonly BookIcon = BookOpen;
-
-  // Mock Data matching mockup
-  stories: Story[] = [
-    {
-      id: '1',
-      title: 'La Petite Étoile',
-      content: 'The fluffy cat sat on the warm mat. It was a sunny day...',
-      difficulty: 'easy',
-      themeColor: 'bg-red-100 text-red-500' // Pinkish
-    },
-    {
-      id: '2',
-      title: "Amis de l'Océan",
-      content: 'Today we went to the zoo. We saw big elephants and tall...',
-      difficulty: 'medium',
-      themeColor: 'bg-cyan-100 text-cyan-600' // Teal/Blue
-    },
-    {
-       id: '3',
-       title: 'Magie du Jardin',
-       content: 'In the magic garden, beautiful flowers bloom every day...',
-       difficulty: 'hard',
-       themeColor: 'bg-yellow-100 text-yellow-600' // Yellow
-    }
-  ];
 }

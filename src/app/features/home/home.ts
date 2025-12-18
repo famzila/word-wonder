@@ -1,19 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LucideAngularModule, Sparkles } from 'lucide-angular';
 import { UploadCard } from './components/upload-card/upload-card';
 import { StoryList } from './components/story-list/story-list';
+import { EditText } from './components/edit-text/edit-text';
+import { StoryStore } from '../../core/store/story.store';
 import { Story } from '../../shared/models/word.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  imports: [TranslatePipe, LucideAngularModule, UploadCard, StoryList],
+  imports: [TranslatePipe, LucideAngularModule, UploadCard, StoryList, EditText],
   template: `
-    <div class="flex flex-col items-center pt-8 px-4 pb-4 space-y-8 animate-fade-in-up">
+    <div class="flex flex-col items-center pt-8 px-4 pb-4 space-y-8 animate-fade-in-up w-full max-w-md mx-auto">
       
-      <!-- Brand Header -->
-      <div class="text-center flex flex-col items-center">
-        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center shadow-lg mb-4 text-white">
+      <!-- Branding (Always Visible) -->
+      <div class="text-center">
+        <div class="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center shadow-lg mb-4 text-white">
           <lucide-angular [img]="SparklesIcon" class="w-10 h-10" strokeWidth="2.5"></lucide-angular>
         </div>
         <h1 class="text-4xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 tracking-tight pb-1">
@@ -24,47 +27,93 @@ import { Story } from '../../shared/models/word.model';
         </p>
       </div>
 
-      <!-- Main Content -->
-      <div class="w-full max-w-sm space-y-2">
-        
-        <!-- Upload Action -->
-        <app-upload-card
-            (onUpload)="handleUpload()"
-            (onCamera)="handleCamera()"
-        ></app-upload-card>
+      <!-- EDIT MODE -->
+      @if (viewMode === 'edit') {
+        <app-edit-text 
+            [text]="store.currentStory()?.content || ''" 
+            (textChange)="store.updateCurrentStoryText($event)"
+            (back)="setViewMode('home')"
+            (start)="startLearning()">
+        </app-edit-text>
+      } 
+      
+      <!-- HOME MODE -->
+      @else {
+        <!-- Upload Card -->
+        <app-upload-card 
+            class="w-full"
+            (onUpload)="handleUpload($event)"
+            (onCamera)="handleCamera($event)">
+        </app-upload-card>
 
-        <!-- Stories -->
+        <!-- Divider -->
+        <div class="flex items-center w-full px-8">
+            <div class="h-px bg-base-300 flex-1"></div>
+            <span class="px-4 text-neutral/40 text-xs font-bold uppercase tracking-wider">
+                {{ 'home.or_story' | translate }}
+            </span>
+            <div class="h-px bg-base-300 flex-1"></div>
+        </div>
+
+        <!-- Story List -->
         <app-story-list 
-            (selectStory)="handleStorySelect($event)"
-        ></app-story-list>
-
-      </div>
+            class="w-full"
+            [stories]="store.stories()"
+            (selectStory)="handleStorySelect($event)">
+        </app-story-list>
+      }
 
     </div>
   `,
   styles: [`
-    .animate-fade-in-up {
-      animation: fadeInUp 0.5s ease-out;
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    :host {
+      display: block;
+      padding-bottom: 7rem; /* Space for Bottom Nav */
     }
   `]
 })
 export class Home {
-  readonly SparklesIcon = Sparkles;
+  // Injections
+  readonly store = inject(StoryStore);
+  readonly router = inject(Router);
 
-  handleUpload() {
-    console.log('Upload clicked');
+  // Other properties
+  readonly SparklesIcon = Sparkles;
+  viewMode: 'home' | 'edit' = 'home';
+
+  constructor() {
+    // Effect to switch to edit mode when OCR succeeds
+    effect(() => {
+        if (this.store.ocrStatus() === 'success') {
+            this.viewMode = 'edit';
+            this.store.resetOcrStatus(); // Reset so we don't re-trigger
+        }
+    });
   }
 
-  handleCamera() {
-    console.log('Camera clicked');
+  handleUpload(file: File) {
+    this.store.processImage(file);
+  }
+
+  handleCamera(file: File) {
+    this.store.processImage(file);
   }
 
   handleStorySelect(story: Story) {
-    console.log('Story selected', story);
-    // Navigate to learn/play page with this story
+    this.store.setCurrentStory(story);
+    this.viewMode = 'edit';
+  }
+
+  setViewMode(mode: 'home' | 'edit') {
+      this.viewMode = mode;
+      if (mode === 'home') {
+          this.store.setCurrentStory(null);
+      }
+  }
+
+  startLearning() {
+      // Navigate to Learn page
+      // Since currentStory is in the store, Learn component can just pick it up
+      this.router.navigate(['/learn']);
   }
 }

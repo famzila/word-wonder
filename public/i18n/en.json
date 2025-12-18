@@ -12,6 +12,7 @@
     }
   },
   "common": {
+    "back": "Back",
     "nav": {
       "home": "Home",
       "learn": "Learn",
