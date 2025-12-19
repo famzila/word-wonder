@@ -1,1 +1,74 @@
-<p>favorites works!</p>
+<div class="min-h-screen bg-base-100 pb-24">
+  <!-- Header Section -->
+  <header class="pt-12 px-6 pb-8 text-center bg-base-100">
+    <div class="bg-warning/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+        <!-- We can use a star or book icon here, sticking to book for consistency or star for favorites -->
+        <lucide-angular [img]="StarIcon" class="w-8 h-8 text-orange-400"></lucide-angular>
+    </div>
+    
+    <h1 class="font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-fun tracking-tighter drop-shadow-sm mb-3">
+      My Word List
+    </h1>
+    
+    <p class="text-neutral/60 font-medium text-lg">
+      Words you're learning to master!
+    </p>
+
+    <div class="mt-4 inline-block">
+        <span class="badge bg-white border-0 shadow-sm text-neutral/50 font-bold px-4 py-3 h-auto">
+            {{ count() }} {{ count() === 1 ? 'word' : 'words' }} saved
+        </span>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="px-6 max-w-md mx-auto space-y-4">
+    
+    @for (word of words(); track word.id) {
+        <div class="card bg-white shadow-xl rounded-[2rem] overflow-hidden border border-base-200">
+            <div class="card-body p-6 flex flex-row items-center justify-between gap-4">
+                
+                <!-- Left: Text -->
+                <div class="flex-1 min-w-0">
+                    <h2 class="font-heading text-xl font-black text-neutral mb-1 truncate capitalize">
+                        {{ word.original }}
+                    </h2>
+                    <p class="text-neutral/60 font-medium truncate">
+                        {{ word.translation }}
+                    </p>
+                    
+                    <div class="mt-3">
+                         <span class="badge badge-soft badge-warning border-0 font-bold px-3 py-2 h-auto text-xs">
+                            {{ word.syllables && word.syllables.length ? word.syllables.join('-') : (word.type || 'word') }} 
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Right: Actions -->
+                 <div class="flex flex-col gap-3">
+                    <button 
+                        (click)="play(word)"
+                        aria-label="Play pronunciation"
+                        class="btn btn-circle btn-lg btn-secondary border-0 text-white shadow-button w-12 h-12 min-h-0">
+                            <lucide-angular [img]="VolumeIcon" class="w-5 h-5 fill-current"></lucide-angular>
+                    </button>
+                    
+                    <button 
+                        (click)="delete(word.id)" 
+                        aria-label="Remove from favorites"
+                        class="btn btn-circle btn-lg btn-outline btn-error w-12 h-12 min-h-0">
+                            <lucide-angular [img]="TrashIcon" class="w-5 h-5"></lucide-angular>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    } @empty {
+        <div class="text-center py-12 px-6">
+            <div class="text-neutral/30 font-bold text-xl mb-4">No words yet!</div>
+            <p class="text-neutral/50">Go to a story and click on any word to save it here.</p>
+        </div>
+    }
+
+  </main>
+</div>

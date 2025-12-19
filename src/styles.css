@@ -90,11 +90,11 @@ body {
 
 /* Custom Utilities */
 .bg-gradient-fun {
-    background: linear-gradient(135deg, hsl(16 90% 60%) 0%, hsl(45 95% 60%) 100%);
+    background-image: linear-gradient(135deg, hsl(16 90% 60%) 0%, hsl(45 95% 60%) 100%);
 }
 
 .bg-gradient-cool {
-    background: linear-gradient(135deg, hsl(174 60% 50%) 0%, hsl(200 80% 70%) 100%);
+    background-image: linear-gradient(135deg, hsl(174 60% 50%) 0%, hsl(200 80% 70%) 100%);
 }
 
 /* Animation Utilities */

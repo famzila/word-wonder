@@ -1,7 +1,8 @@
-import { Component, input, output, signal, ElementRef, viewChild, inject, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { LucideAngularModule, X, Volume2, Star } from 'lucide-angular';
+import { Component, input, output, signal, ElementRef, viewChild, inject, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
+import { LucideAngularModule, X, Volume2, Star, Trash2 } from 'lucide-angular';
 import { Word } from '../../models/word.model';
 import { TtsService } from '../../../core/services/tts.service';
+import { FavoritesStore } from '../../../core/store/favorites.store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -19,7 +20,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
         <!-- Word Title -->
         <div class="text-center mb-6">
-             <h2 id="modal-title" class="font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 tracking-tighter drop-shadow-sm select-none capitalize">
+             <h2 id="modal-title" class="font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-fun tracking-tighter drop-shadow-sm select-none capitalize">
                {{ word()?.original }}
              </h2>
         </div>
@@ -51,13 +52,25 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
             </div>
 
             <div class="flex gap-4 pt-2">
-                <button (click)="speak()" aria-label="Listen to word pronunciation" class="btn bg-teal-400 hover:bg-teal-500 border-0 flex-1 rounded-full text-white shadow-button btn-lg h-14">
+                <button (click)="speak()" aria-label="Listen to word pronunciation" class="btn btn-secondary border-0 flex-1 rounded-full text-white shadow-button btn-lg h-14">
                     <lucide-angular [img]="VolumeIcon" class="w-6 h-6 fill-current"></lucide-angular>
                     Listen
                 </button>
-                <button aria-label="Save word to favorites" class="btn border-0 flex-1 rounded-full text-white shadow-button btn-lg h-14 bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500">
-                     <lucide-angular [img]="StarIcon" class="w-6 h-6 fill-current"></lucide-angular>
-                     Save
+                <button 
+                  (click)="toggleFavorite()" 
+                  aria-label="Toggle favorite status" 
+                  [class.btn-outline]="isFavorite()"
+                  [class.btn-error]="isFavorite()"
+                  [class.bg-gradient-fun]="!isFavorite()"
+                  class="btn border-0 flex-1 rounded-full shadow-button btn-lg h-14 transition-all duration-300">
+                     
+                     <lucide-angular 
+                        [img]="isFavorite() ? TrashIcon : StarIcon" 
+                        class="w-6 h-6 transition-all duration-300"
+                        [class.fill-current]="!isFavorite()"
+                        >
+                     </lucide-angular>
+                     {{ isFavorite() ? 'Remove' : 'Save' }}
                 </button>
             </div>
 
@@ -68,11 +81,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
       </form>
     </dialog>
   `,
-  styles: []
 })
 export class WordDetailModal {
   // 1. Injections first
   private ttsService = inject(TtsService);
+  private favoritesStore = inject(FavoritesStore);
   private destroyRef = inject(DestroyRef);
 
   // 2. Queries/inputs/outputs next
@@ -81,12 +94,25 @@ export class WordDetailModal {
   languageCode = input<string>('en-US');
   closeModal = output<void>();
 
-  // 3. Other properties (readonly icons)
+  // 3. Signals / Computed
+  // Calculate unique ID consistent with store logic
+  favoriteId = computed(() => {
+    const w = this.word();
+    return w ? `${this.languageCode()}-${w.original.toLowerCase()}` : '';
+  });
+
+  isFavorite = computed(() => {
+    const id = this.favoriteId();
+    return id ? this.favoritesStore.isFavorite()(id) : false;
+  });
+
+  // 4. Other properties (readonly icons)
   readonly XIcon = X;
   readonly VolumeIcon = Volume2;
   readonly StarIcon = Star;
+  readonly TrashIcon = Trash2; // Added Trash icon
 
-  // 4. Methods
+  // 5. Methods
   open() {
     this.modalRef()?.nativeElement.showModal();
   }
@@ -109,9 +135,15 @@ export class WordDetailModal {
             },
             error: err => {
               console.error('Failed to speak word:', err);
-              // Could show user-friendly error message here
             }
           });
+    }
+  }
+
+  toggleFavorite() {
+    const w = this.word();
+    if (w) {
+      this.favoritesStore.toggle(w, this.languageCode());
     }
   }
 }
