@@ -78,6 +78,7 @@ export class WordDetailModal {
   // 2. Queries/inputs/outputs next
   private modalRef = viewChild<ElementRef<HTMLDialogElement>>('modalRef');
   word = input<Word | null>(null);
+  languageCode = input<string>('en-US');
   closeModal = output<void>();
 
   // 3. Other properties (readonly icons)
@@ -98,7 +99,7 @@ export class WordDetailModal {
   speak() {
     const w = this.word();
     if (w) {
-        this.ttsService.speak(w.original, 'en-US', 1)
+        this.ttsService.speak(w.original, this.languageCode(), 1)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: result => {
