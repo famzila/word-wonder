@@ -11,7 +11,7 @@ import { LucideAngularModule, Sparkles } from 'lucide-angular';
       <div class="card-body p-8">
         
         <h2 class="font-heading text-2xl text-neutral font-black mb-6 text-center">
-          Edit Your Text
+          {{ 'edit_text.title' | translate }}
         </h2>
 
         <div class="form-control mb-8">
@@ -20,7 +20,7 @@ import { LucideAngularModule, Sparkles } from 'lucide-angular';
             [value]="text()" 
             (input)="onInput($event)"
             class="textarea textarea-bordered h-64 w-full text-lg leading-relaxed resize-none bg-orange-50/30 focus:outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100 rounded-2xl p-6"
-            placeholder="Enter your text here...">
+            [placeholder]="'edit_text.placeholder' | translate">
           </textarea>
         </div>
 
@@ -33,7 +33,7 @@ import { LucideAngularModule, Sparkles } from 'lucide-angular';
           <!-- Start Learning Button -->
           <button (click)="start.emit()" class="btn btn-lg border-none text-white rounded-2xl flex-1 font-sans font-medium shadow-xl shadow-orange-200 hover:scale-[1.02] active:scale-[0.98] transition-all bg-gradient-to-r from-orange-400 to-yellow-400 h-16 text-lg whitespace-nowrap">
             <lucide-angular [img]="SparklesIcon" class="w-6 h-6 mr-2"></lucide-angular>
-            Start Learning!
+            {{ 'edit_text.start_btn' | translate }}
           </button>
         </div>
 

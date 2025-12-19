@@ -1,12 +1,14 @@
-import { Component, inject, DestroyRef } from '@angular/core';
+import { Component, inject, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule, Volume2, Trash2, Star } from 'lucide-angular';
 import { FavoritesStore, FavoriteWord } from '../../core/store/favorites.store';
 import { TtsService } from '../../core/services/tts.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-favorites',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, TranslateModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './favorites.html',
 })
 export class Favorites {

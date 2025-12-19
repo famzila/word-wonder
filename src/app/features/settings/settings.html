@@ -1,1 +1,64 @@
-<p>settings works!</p>
+<div class="min-h-screen bg-base-100 pb-24">
+  <!-- Header Section -->
+  <header class="pt-12 px-6 pb-8 text-center bg-base-100">
+    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+        <lucide-angular [img]="SettingsIcon" class="w-8 h-8 text-purple-400"></lucide-angular>
+    </div>
+    
+    <h1 class="font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-fun tracking-tighter drop-shadow-sm mb-3">
+      {{ 'settings.title' | translate }}
+    </h1>
+  </header>
+
+  <!-- Content -->
+  <main class="px-6 max-w-md mx-auto">
+    
+    <div class="card bg-white shadow-xl rounded-[2rem] overflow-hidden border border-base-200">
+        <div class="card-body p-6">
+            
+            <!-- Section Header -->
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div>
+                    <h2 class="font-heading text-xl font-bold text-neutral">{{ 'settings.language_label' | translate }}</h2>
+                    <p class="text-sm text-neutral/50 font-medium">{{ 'settings.language_desc' | translate }}</p>
+                </div>
+            </div>
+
+            <!-- Language List -->
+            <div class="space-y-3">
+                @for (lang of languages; track lang.code) {
+                    <button 
+                        (click)="setLanguage(lang.code)"
+                        class="w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-200 group relative overflow-hidden"
+                        [class.border-orange-400]="currentLang() === lang.code"
+                        [class.bg-orange-50]="currentLang() === lang.code"
+                        [class.border-transparent]="currentLang() !== lang.code"
+                        [class.bg-neutral-50]="currentLang() !== lang.code"
+                        [class.hover:bg-neutral-100]="currentLang() !== lang.code">
+                        
+                        <div class="flex items-center gap-4 z-10">
+                            <span class="text-2xl filter drop-shadow-sm">{{ lang.flag }}</span>
+                            <span class="font-heading font-bold text-lg"
+                                [class.text-neutral]="currentLang() !== lang.code"
+                                [class.text-neutral-800]="currentLang() === lang.code">
+                                {{ lang.name }}
+                            </span>
+                        </div>
+
+                        @if (currentLang() === lang.code) {
+                            <div class="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white shadow-sm z-10 animate-in zoom-in duration-200">
+                                <lucide-angular [img]="CheckIcon" class="w-5 h-5" strokeWidth="3"></lucide-angular>
+                            </div>
+                        }
+                    </button>
+                }
+            </div>
+
+        </div>
+    </div>
+
+  </main>
+</div>

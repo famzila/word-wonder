@@ -1,0 +1,68 @@
+{
+  "home": {
+    "title": "Word Wonder",
+    "subtitle": "Apprends à parler comme une star !",
+    "upload_image": "Télécharger une image",
+    "take_photo": "Prendre une photo",
+    "section_stories": "ou essaie une histoire",
+    "upload_card": {
+      "title": "Télécharger une image",
+      "upload_btn": "Appuyez pour télécharger",
+      "camera_btn": "ou prenez une photo"
+    }
+  },
+  "common": {
+    "back": "Retour",
+    "listen": "Écouter",
+    "save": "Enregistrer",
+    "remove": "Supprimer",
+    "word": "mot",
+    "nav": {
+      "home": "Accueil",
+      "learn": "Apprenez",
+      "favorites": "Mots",
+      "settings": "Réglages"
+    }
+  },
+  "edit_text": {
+    "title": "Modifie ton texte",
+    "placeholder": "Entre ton texte ici...",
+    "start_btn": "Commencer !"
+  },
+  "favorites": {
+    "title": "Ma liste de mots",
+    "subtitle": "Les mots que tu apprends !",
+    "saved_suffix": "mots enregistrés",
+    "empty_title": "Pas encore de mots !",
+    "empty_desc": "Va dans une histoire et clique sur un mot pour l'enregistrer ici."
+  },
+  "settings": {
+    "title": "Réglages",
+    "language_label": "Langue",
+    "language_desc": "Choisis ta langue préférée"
+  },
+  "word_modal": {
+    "syllables": "Syllabes :",
+    "meaning_label": "Qu'est-ce que ça veut dire ?"
+  },
+  "learn": {
+    "mode_listen": "Écoute et apprends",
+    "mode_practice": "Temps de pratique",
+    "tab_listen": "Écouter",
+    "tab_practice": "Pratiquer"
+  },
+  "stories": {
+    "star": {
+      "title": "La Petite Étoile",
+      "content": "Le chat tout doux s'est assis sur le tapis chaud. C'était une journée ensoleillée et le chat était content. Le chat aimait jouer avec la balle rouge."
+    },
+    "ocean": {
+      "title": "Amis de l'Océan",
+      "content": "Aujourd'hui, nous sommes allés au zoo. Nous avons vu de grands éléphants et de grandes girafes. Les singes étaient drôles. Ils sautaient d'arbre en arbre."
+    },
+    "garden": {
+      "title": "Magie du Jardin",
+      "content": "Dans le jardin magique, de belles fleurs fleurissent chaque jour. Les papillons dansent dans l'air. Les oiseaux chantent de douces chansons."
+    }
+  }
+}

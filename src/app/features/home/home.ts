@@ -1,5 +1,5 @@
 import { Component, inject, effect } from '@angular/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LucideAngularModule, Sparkles } from 'lucide-angular';
 import { UploadCard } from './components/upload-card/upload-card';
 import { StoryList } from './components/story-list/story-list';
@@ -65,6 +65,7 @@ export class Home {
   // Injections
   readonly store = inject(StoryStore);
   readonly router = inject(Router);
+  readonly translate = inject(TranslateService);
 
   // Other properties
   readonly SparklesIcon = Sparkles;
@@ -89,7 +90,13 @@ export class Home {
   }
 
   handleStorySelect(story: Story) {
-    this.store.setCurrentStory(story);
+    // Translate the story content if it's a key
+    const translatedStory = {
+        ...story,
+        title: this.translate.instant(story.title),
+        content: this.translate.instant(story.content)
+    };
+    this.store.setCurrentStory(translatedStory);
     this.viewMode = 'edit';
   }
 

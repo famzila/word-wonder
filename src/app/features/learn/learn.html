@@ -6,8 +6,8 @@
       <lucide-angular [img]="BackIcon" class="w-6 h-6 text-neutral"></lucide-angular>
     </button>
     <h1 class="text-3xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 tracking-tight drop-shadow-sm">
-        @if (store.isListenMode()) { Listen & Learn }
-        @else { Practice Time }
+        @if (store.isListenMode()) { {{ 'learn.mode_listen' | translate }} }
+        @else { {{ 'learn.mode_practice' | translate }} }
     </h1>
   </div>
 
@@ -23,7 +23,7 @@
       (click)="onTabChange('listen')"
     >
       <lucide-angular [img]="VolumeIcon" class="w-6 h-6"></lucide-angular>
-      Listen
+      {{ 'learn.tab_listen' | translate }}
     </button>
     <button 
       class="btn h-14 rounded-full border-0 transition-all duration-300 text-lg font-bold"
@@ -35,7 +35,7 @@
       (click)="onTabChange('practice')"
     >
       <lucide-angular [img]="MicIcon" class="w-6 h-6"></lucide-angular>
-      Practice
+      {{ 'learn.tab_practice' | translate }}
     </button>
   </div>
 

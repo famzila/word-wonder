@@ -13,11 +13,56 @@
   },
   "common": {
     "back": "Back",
+    "listen": "Listen",
+    "save": "Save",
+    "remove": "Remove",
+    "word": "word",
     "nav": {
       "home": "Home",
       "learn": "Learn",
       "favorites": "My Words",
       "settings": "Settings"
+    }
+  },
+  "edit_text": {
+    "title": "Edit Your Text",
+    "placeholder": "Enter your text here...",
+    "start_btn": "Start Learning!"
+  },
+  "favorites": {
+    "title": "My Word List",
+    "subtitle": "Words you're learning to master!",
+    "saved_suffix": "words saved",
+    "empty_title": "No words yet!",
+    "empty_desc": "Go to a story and click on any word to save it here."
+  },
+  "settings": {
+    "title": "Settings",
+    "language_label": "Language",
+    "language_desc": "Select your preferred language"
+  },
+  "word_modal": {
+    "syllables": "Syllables:",
+    "meaning_label": "What does it mean?"
+  },
+  "learn": {
+    "mode_listen": "Listen & Learn",
+    "mode_practice": "Practice Time",
+    "tab_listen": "Listen",
+    "tab_practice": "Practice"
+  },
+  "stories": {
+    "star": {
+      "title": "La Petite Étoile",
+      "content": "The fluffy cat sat on the warm mat. It was a sunny day and the cat was happy. The cat liked to play with the red ball."
+    },
+    "ocean": {
+      "title": "Amis de l'Océan",
+      "content": "Today we went to the zoo. We saw big elephants and tall giraffes. The monkeys were funny. They jumped from tree to tree."
+    },
+    "garden": {
+      "title": "Magie du Jardin",
+      "content": "In the magic garden, beautiful flowers bloom every day. The butterflies dance in the air. The birds sing sweet songs."
     }
   }
 }

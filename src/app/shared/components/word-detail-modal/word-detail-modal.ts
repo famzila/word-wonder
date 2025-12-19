@@ -5,9 +5,11 @@ import { TtsService } from '../../../core/services/tts.service';
 import { FavoritesStore } from '../../../core/store/favorites.store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { TranslateModule } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-word-modal',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, TranslateModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <dialog #modalRef class="modal modal-bottom sm:modal-middle" aria-labelledby="modal-title">
@@ -29,7 +31,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
             
             <!-- Syllables Chip -->
             <div class="bg-warning/10 rounded-[2rem] p-6 text-center">
-                <p class="text-sm font-bold text-neutral/60 mb-3">Syllables:</p>
+                <p class="text-sm font-bold text-neutral/60 mb-3">{{ 'word_modal.syllables' | translate }}</p>
                 <div class="flex justify-center flex-wrap gap-2">
                     @for (syl of word()?.syllables; track $index) {
                       <span class="badge badge-lg bg-orange-200/50 text-neutral font-heading text-xl font-bold py-6 px-6 border-0">
@@ -45,7 +47,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
             <!-- Definition -->
             <div class="bg-info/10 rounded-[2rem] p-6 text-center">
-                <p class="text-sm font-bold text-teal-700/60 mb-2">What does it mean?</p>
+                <p class="text-sm font-bold text-teal-700/60 mb-2">{{ 'word_modal.meaning_label' | translate }}</p>
                 <p class="font-medium text-neutral text-lg leading-relaxed">
                     {{ word()?.translation }}
                 </p>
@@ -54,7 +56,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
             <div class="flex gap-4 pt-2">
                 <button (click)="speak()" aria-label="Listen to word pronunciation" class="btn btn-secondary border-0 flex-1 rounded-full text-white shadow-button btn-lg h-14">
                     <lucide-angular [img]="VolumeIcon" class="w-6 h-6 fill-current"></lucide-angular>
-                    Listen
+                    {{ 'common.listen' | translate }}
                 </button>
                 <button 
                   (click)="toggleFavorite()" 
@@ -70,7 +72,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
                         [class.fill-current]="!isFavorite()"
                         >
                      </lucide-angular>
-                     {{ isFavorite() ? 'Remove' : 'Save' }}
+                     {{ isFavorite() ? ('common.remove' | translate) : ('common.save' | translate) }}
                 </button>
             </div>
 

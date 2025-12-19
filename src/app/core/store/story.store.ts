@@ -17,24 +17,24 @@ const initialState: StoryState = {
   stories: [
     {
       id: '1',
-      title: 'La Petite Étoile',
-      content: 'The fluffy cat sat on the warm mat. It was a sunny day and the cat was happy. The cat liked to play with the red ball.',
+      title: 'stories.star.title',
+      content: 'stories.star.content',
       difficulty: 'easy',
       themeColor: 'bg-error/10 text-error',
       languageCode: 'en-US'
     },
     {
       id: '2',
-      title: "Amis de l'Océan",
-      content: 'Today we went to the zoo. We saw big elephants and tall giraffes. The monkeys were funny. They jumped from tree to tree.',
+      title: 'stories.ocean.title',
+      content: 'stories.ocean.content',
       difficulty: 'medium',
       themeColor: 'bg-info/10 text-info',
       languageCode: 'en-US'
     },
     {
        id: '3',
-       title: 'Magie du Jardin',
-       content: 'In the magic garden, beautiful flowers bloom every day. The butterflies dance in the air. The birds sing sweet songs.',
+       title: 'stories.garden.title',
+       content: 'stories.garden.content',
        difficulty: 'hard',
        themeColor: 'bg-warning/10 text-warning',
        languageCode: 'en-US'

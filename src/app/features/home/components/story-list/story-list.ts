@@ -22,10 +22,10 @@ import { Story } from '../../../../shared/models/word.model';
                 </figure>
                 <div class="card-body p-4 py-2 gap-1 justify-center block min-w-0">
                     <h3 class="font-heading text-lg font-bold text-neutral truncate w-full leading-tight group-hover:text-primary transition-colors">
-                        {{ story.title }}
+                        {{ story.title | translate }}
                     </h3>
                     <p class="text-neutral/50 text-xs font-medium truncate w-full">
-                        {{ story.content }}
+                        {{ story.content | translate }}
                     </p>
                 </div>
             </button>
