@@ -1,0 +1,68 @@
+/* Keyframes for word highlight animation */
+@keyframes word-highlight {
+    0% {
+        background-color: transparent;
+        transform: scale(1);
+    }
+
+    50% {
+        /* Using oklch with variable for transparency, matching plan/request */
+        background-color: oklch(from var(--color-warning) l c h / 0.5);
+        transform: scale(1.05);
+    }
+
+    100% {
+        background-color: transparent;
+        transform: scale(1);
+    }
+}
+
+.animate-word-highlight {
+    animation: word-highlight 0.6s ease-in-out forwards;
+    /* Keep the highlight active or just the animation? 
+     If we want it to stay highlighted while active, we should set a persistent state.
+     The request asked for animation frame, but typically active word stays highlighted.
+     I'll adhere to the request's animation for now, but maybe add a base style for 'active' matches.
+  */
+    background-color: var(--color-warning);
+    /* Fallback/End state? No, animation goes to transparent */
+    /* Actually, usually the current word STAYS highlighted. 
+     The animation 100% is transparent. 
+     If the user wants it to stay highlighted, the CSS should be different.
+     Request: "use scale and sunny color whenever a word is hovered or highlighted"
+     The animation provided goes back to transparent. 
+     However, for a "read along" feature, usually the active word IS highlighted.
+     I will tweak the animation to keep the background color if it's the active index, 
+     but the provided keyframe ends in transparent. 
+     I'll stick to the requested Keyframe exactly for now to satisfy the "strict" requirement,
+     but I suspect they might want it to stay highlighted. 
+     Actually, let's look at the mockup 1. The word "liked" has a solid background. 
+     So the animation might be for the *transition*? 
+     Or the user provided animation IS the interaction.
+     I will trust the user provided CSS for the animation class.
+     BUT, I will also add a static class for "active" if the index persists.
+     The current code applies the class based on index match. 
+     If index stays matched, animation runs once? 
+     Re-applying class triggers animation? 
+     In Angular, just changing index changes the class.
+     I will stick to the requested code.
+  */
+}
+
+
+/* Override for persistent active state if needed, but let's follow the user's specific CSS request first */
+.animate-word-highlight {
+    animation: word-highlight 0.6s ease-in-out forwards;
+    background-color: var(--color-warning);
+    color: var(--color-warning-content);
+    border-radius: 0.5rem;
+    padding: 0.125rem 0.375rem;
+}
+
+/* Error styling for mispronounced words */
+.word-error {
+    text-decoration: underline wavy;
+    text-decoration-color: var(--color-error);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}

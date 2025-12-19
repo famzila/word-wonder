@@ -1,1 +1,71 @@
-<p>learn works!</p>
+<div class="min-h-screen pb-20 p-4 max-w-lg mx-auto flex flex-col gap-6">
+  
+  <!-- Header -->
+  <div class="flex items-center gap-4 py-2">
+    <button (click)="goBack()" class="btn btn-circle btn-ghost btn-sm">
+      <lucide-angular [img]="BackIcon" class="w-6 h-6 text-neutral"></lucide-angular>
+    </button>
+    <h1 class="text-3xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 tracking-tight drop-shadow-sm">
+        @if (store.isListenMode()) { Listen & Learn }
+        @else { Practice Time }
+    </h1>
+  </div>
+
+  <!-- Tab Switcher -->
+  <div class="grid grid-cols-2 bg-[#FDF6E3] p-2 rounded-[2rem] shadow-inner mb-2">
+    <button 
+      class="btn h-14 rounded-full border-0 transition-all duration-300 text-lg font-bold"
+      [class.bg-secondary]="store.isListenMode()"
+      [class.text-white]="store.isListenMode()"
+      [class.shadow-lg]="store.isListenMode()"
+      [class.btn-ghost]="!store.isListenMode()"
+      [class.text-neutral]="!store.isListenMode()"
+      (click)="onTabChange('listen')"
+    >
+      <lucide-angular [img]="VolumeIcon" class="w-6 h-6"></lucide-angular>
+      Listen
+    </button>
+    <button 
+      class="btn h-14 rounded-full border-0 transition-all duration-300 text-lg font-bold"
+      [class.bg-primary]="store.isPracticeMode()"
+      [class.text-white]="store.isPracticeMode()"
+      [class.shadow-lg]="store.isPracticeMode()"
+      [class.btn-ghost]="!store.isPracticeMode()"
+      [class.text-neutral]="!store.isPracticeMode()"
+      (click)="onTabChange('practice')"
+    >
+      <lucide-angular [img]="MicIcon" class="w-6 h-6"></lucide-angular>
+      Practice
+    </button>
+  </div>
+
+  <!-- Content Card -->
+  <app-text-display 
+    [text]="store.text()" 
+    [currentWordIndex]="store.currentWordIndex()"
+    [mispronuncedWords]="store.mispronuncedWords()"
+    (wordClick)="onWordClick($event)"
+  ></app-text-display>
+
+  <!-- Controls -->
+  @if (store.isListenMode()) {
+    <app-player-controls
+      [isPlaying]="store.isPlaying()"
+      [playbackSpeed]="store.playbackSpeed()"
+      [currentWordIndex]="store.currentWordIndex()"
+      [totalWords]="totalWords"
+      (playToggle)="togglePlay()"
+      (reset)="resetAudio()"
+      (speedChange)="onSpeedChange($event)"
+      (positionChange)="onPositionChange($event)"
+    ></app-player-controls>
+  } @else {
+    <app-practice-controls
+      [isRecording]="store.isRecording()"
+      (toggleRecording)="toggleRecording()"
+    ></app-practice-controls>
+  }
+
+  <app-word-modal [word]="selectedWord"></app-word-modal>
+
+</div>

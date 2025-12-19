@@ -1,0 +1,24 @@
+<div class="card bg-base-200 shadow-xl p-8 text-3xl/loose font-heading text-neutral rounded-[2.5rem]">
+  <div class="flex flex-wrap gap-2">
+    @for (item of words(); track item.index) {
+      <span 
+        class="cursor-pointer rounded-3xl px-1 py-0.5 transition-all duration-200 hover:bg-warning/30 hover:scale-105"
+        role="button"
+        tabindex="0"
+        [class.animate-word-highlight]="item.index === currentWordIndex()"
+        [class.text-neutral/40]="currentWordIndex() !== -1 && item.index !== currentWordIndex()"
+        [class.word-error]="mispronuncedWords().includes(item.index)"
+        [attr.aria-label]="'Learn more about ' + item.word"
+        (click)="onWordClick(item.word)"
+        (keydown.enter)="onWordClick(item.word)"
+        (keydown.space)="onWordClick(item.word); $event.preventDefault()"
+      >
+        {{ item.word }}
+      </span>
+    }
+  </div>
+  
+  <p class="text-center text-xs text-neutral/40 font-bold mt-8 uppercase tracking-widest">
+    Tap any word to learn more about it!
+  </p>
+</div>

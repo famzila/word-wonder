@@ -1,0 +1,72 @@
+<div class="card bg-base-200 shadow-xl p-8 rounded-[2.5rem] space-y-8">
+  
+  <!-- Speed Control -->
+  <div class="space-y-2">
+    <div class="flex justify-between text-sm font-bold text-neutral/70">
+      <span>Speed: {{ playbackSpeed() }}x</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-xs font-bold text-neutral/50">Slow</span>
+      <lucide-angular [img]="Turtle" class="w-4 h-4 text-emerald-500"></lucide-angular>
+      
+      <input 
+        type="range"
+        aria-label="Playback speed control" 
+        min="0.5" 
+        max="1.5" 
+        step="0.25" 
+        [value]="playbackSpeed()" 
+        (input)="onSpeedChange($event)"
+        class="range range-xs range-primary flex-1" 
+      />
+      
+      <lucide-angular [img]="Rabbit" class="w-4 h-4 text-orange-500"></lucide-angular>
+      <span class="text-xs font-bold text-neutral/50">Fast</span>
+    </div>
+  </div>
+
+  <!-- Position Slider -->
+  <div class="space-y-2">
+      <div class="flex justify-between text-sm font-bold text-neutral/70">
+        <span>Position: {{ currentWordIndex() + 1 }} / {{ totalWords() }}</span>
+      </div>
+      <input 
+        type="range"
+        aria-label="Word position in text" 
+        [min]="0" 
+        [max]="totalWords() - 1" 
+        [value]="currentWordIndex()" 
+        (input)="onPositionChange($event)"
+        class="range range-xs range-secondary" 
+      />
+      <div class="flex justify-between text-xs font-bold text-neutral/50">
+        <span>Start</span>
+        <span>End</span>
+      </div>
+  </div>
+
+  <!-- Main Actions -->
+  <div class="flex gap-4">
+    <button 
+      class="btn btn-outline btn-lg flex-1 rounded-full border-2 hover:bg-base-200 border-orange-500 text-orange-500"
+      (click)="reset.emit()"
+    >
+      <lucide-angular [img]="RotateCcw" class="w-6 h-6"></lucide-angular>
+      Reset
+    </button>
+
+    <button 
+      class="btn btn-lg flex-1 rounded-full border-0 shadow-button text-white bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-500 hover:to-cyan-500"
+      (click)="playToggle.emit()"
+    >
+      @if (isPlaying()) {
+        <lucide-angular [img]="Pause" class="w-6 h-6 fill-current"></lucide-angular>
+        Pause
+      } @else {
+        <lucide-angular [img]="Play" class="w-6 h-6 fill-current"></lucide-angular>
+        Play
+      }
+    </button>
+  </div>
+
+</div>

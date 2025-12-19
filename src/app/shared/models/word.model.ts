@@ -16,4 +16,5 @@ export interface Story {
   thumbnailUrl?: string;
   difficulty: 'easy' | 'medium' | 'hard';
   themeColor?: string; // e.g. 'bg-red-100 text-red-500'
+  languageCode?: string; // e.g. 'en-US', 'fr', 'es'
 }

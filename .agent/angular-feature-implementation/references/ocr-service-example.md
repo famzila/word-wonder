@@ -1,15 +1,16 @@
+Example of ocr service
+
+```typescript
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, switchMap } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OcrService {
   private http = inject(HttpClient);
-  // Note: For production, calls to Google Vision should be proxied through a backend
-  // to protect the API key. This client-side implementation is for prototype/demo only.
   private apiUrl = `https://vision.googleapis.com/v1/images:annotate?key=${environment.googleCloudApiKey}`;
 
   extractText(file: File): Observable<{ text: string, languageCode: string }> {
@@ -48,15 +49,11 @@ export class OcrService {
             }
 
             console.log('Detected Locale from OCR:', detectedLocale);
-            
-            // Normalize to BCP-47 format (e.g., 'fr' -> 'fr-FR')
-            const normalizedLocale = this.normalizeLanguageCode(detectedLocale);
-            console.log('Normalized Locale:', normalizedLocale);
 
             if (annotations && annotations.length > 0) {
               return {
                 text: annotations[0].description,
-                languageCode: normalizedLocale
+                languageCode: detectedLocale
               };
             }
             return { text: 'No text found in image.', languageCode: 'en-US' };
@@ -64,57 +61,6 @@ export class OcrService {
         );
       })
     );
-  }
-
-  /**
-   * Normalize language codes to BCP-47 format expected by Google TTS/STT APIs
-   * Converts 2-letter ISO codes (e.g., 'fr') to full locale codes (e.g., 'fr-FR')
-   */
-  private normalizeLanguageCode(code: string): string {
-    // If already in BCP-47 format (e.g., 'en-US'), return as-is
-    if (code.includes('-')) {
-      return code;
-    }
-
-    // Map common 2-letter codes to BCP-47 format
-    const languageMap: { [key: string]: string } = {
-      'en': 'en-US',
-      'fr': 'fr-FR',
-      'es': 'es-ES',
-      'de': 'de-DE',
-      'it': 'it-IT',
-      'pt': 'pt-PT',
-      'nl': 'nl-NL',
-      'pl': 'pl-PL',
-      'ru': 'ru-RU',
-      'ja': 'ja-JP',
-      'ko': 'ko-KR',
-      'zh': 'zh-CN',
-      'ar': 'ar-SA',
-      'hi': 'hi-IN',
-      'tr': 'tr-TR',
-      'sv': 'sv-SE',
-      'da': 'da-DK',
-      'fi': 'fi-FI',
-      'no': 'nb-NO',
-      'cs': 'cs-CZ',
-      'el': 'el-GR',
-      'he': 'he-IL',
-      'th': 'th-TH',
-      'vi': 'vi-VN',
-      'id': 'id-ID',
-      'ms': 'ms-MY',
-      'uk': 'uk-UA',
-      'ro': 'ro-RO',
-      'hu': 'hu-HU',
-      'sk': 'sk-SK',
-      'bg': 'bg-BG',
-      'hr': 'hr-HR',
-      'sr': 'sr-RS',
-      'ca': 'ca-ES',
-    };
-
-    return languageMap[code.toLowerCase()] || 'en-US';
   }
 
   private convertFileToBase64(file: File): Observable<string> {
@@ -132,3 +78,4 @@ export class OcrService {
     });
   }
 }
+```

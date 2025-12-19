@@ -14,7 +14,6 @@ import { Router } from '@angular/router';
   template: `
     <div class="flex flex-col items-center pt-8 px-4 pb-4 space-y-8 animate-fade-in-up w-full max-w-md mx-auto">
       
-      <!-- Branding (Always Visible) -->
       <div class="text-center">
         <div class="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center shadow-lg mb-4 text-white">
           <lucide-angular [img]="SparklesIcon" class="w-10 h-10" strokeWidth="2.5"></lucide-angular>
@@ -27,7 +26,6 @@ import { Router } from '@angular/router';
         </p>
       </div>
 
-      <!-- EDIT MODE -->
       @if (viewMode === 'edit') {
         <app-edit-text 
             [text]="store.currentStory()?.content || ''" 
@@ -45,15 +43,6 @@ import { Router } from '@angular/router';
             (onUpload)="handleUpload($event)"
             (onCamera)="handleCamera($event)">
         </app-upload-card>
-
-        <!-- Divider -->
-        <div class="flex items-center w-full px-8">
-            <div class="h-px bg-base-300 flex-1"></div>
-            <span class="px-4 text-neutral/40 text-xs font-bold uppercase tracking-wider">
-                {{ 'home.or_story' | translate }}
-            </span>
-            <div class="h-px bg-base-300 flex-1"></div>
-        </div>
 
         <!-- Story List -->
         <app-story-list 

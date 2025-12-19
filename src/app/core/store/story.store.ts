@@ -20,21 +20,24 @@ const initialState: StoryState = {
       title: 'La Petite Étoile',
       content: 'The fluffy cat sat on the warm mat. It was a sunny day and the cat was happy. The cat liked to play with the red ball.',
       difficulty: 'easy',
-      themeColor: 'bg-red-100 text-red-500'
+      themeColor: 'bg-error/10 text-error',
+      languageCode: 'en-US'
     },
     {
       id: '2',
       title: "Amis de l'Océan",
       content: 'Today we went to the zoo. We saw big elephants and tall giraffes. The monkeys were funny. They jumped from tree to tree.',
       difficulty: 'medium',
-      themeColor: 'bg-cyan-100 text-cyan-600'
+      themeColor: 'bg-info/10 text-info',
+      languageCode: 'en-US'
     },
     {
        id: '3',
        title: 'Magie du Jardin',
        content: 'In the magic garden, beautiful flowers bloom every day. The butterflies dance in the air. The birds sing sweet songs.',
        difficulty: 'hard',
-       themeColor: 'bg-yellow-100 text-yellow-600'
+       themeColor: 'bg-warning/10 text-warning',
+       languageCode: 'en-US'
     }
   ],
   currentStory: null,
@@ -70,13 +73,14 @@ export const StoryStore = signalStore(
         switchMap((file) => 
           ocrService.extractText(file).pipe(
             tapResponse({
-              next: ({ text }: { text: string }) => {
+              next: ({ text, languageCode }: { text: string, languageCode: string }) => {
                 const newStory: Story = {
                   id: Date.now().toString(),
                   title: 'Captured Text',
                   content: text,
                   difficulty: 'medium', // Default
-                  themeColor: 'bg-purple-100 text-purple-600'
+                  themeColor: 'bg-secondary/10 text-secondary',
+                  languageCode: languageCode // Store the detected language
                 };
                 patchState(store, { 
                   ocrStatus: 'success', 
