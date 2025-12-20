@@ -15,6 +15,7 @@ import { PlayerControls } from './components/player-controls/player-controls.com
 import { PracticeControls } from './components/practice-controls/practice-controls.component';
 import { WordDetailModal } from '../../shared/components/word-detail-modal/word-detail-modal';
 import { Word } from '../../shared/models/word.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-learn',
@@ -23,7 +24,8 @@ import { Word } from '../../shared/models/word.model';
     TextDisplay, 
     PlayerControls, 
     PracticeControls,
-    WordDetailModal
+    WordDetailModal,
+    TranslatePipe
   ],
   providers: [LearnStore],
   templateUrl: './learn.html',
