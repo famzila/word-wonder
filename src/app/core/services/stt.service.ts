@@ -2,19 +2,28 @@ import { Injectable, inject, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, throwError, from } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { GoogleGenAI } from '@google/genai';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SttService {
   private http = inject(HttpClient);
-  private apiUrl = `https://speech.googleapis.com/v1/speech:recognize?key=${environment.googleCloudApiKey}`;
+  // private apiUrl = ... (Removed legacy URL)
+  
+  private genAI: GoogleGenAI;
   
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private stream: MediaStream | null = null;
   private recognition: any = null; // Web Speech API SpeechRecognition
   private ngZone = inject(NgZone);
+
+  constructor() {
+    this.genAI = new GoogleGenAI({
+      apiKey: environment.googleCloudApiKey
+    });
+  }
 
 
   async startRecording(): Promise<void> {
@@ -114,30 +123,30 @@ export class SttService {
     }
   }
 
-  stopAndAnalyze(languageCode: string = 'en-US'): Observable<string> {
-    return new Observable<string>(observer => {
+  stopAndAnalyze(targetText: string, languageCode: string = 'en-US'): Observable<any> {
+    return new Observable(observer => {
       if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') {
         observer.error('Recorder not active');
         return;
       }
 
       this.mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' }); // Chrome records in webm by default
+        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
         this.stopStream(); // Cleanup stream
         
         // Convert Blob to Base64
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
           const base64Audio = (reader.result as string).split(',')[1];
           
-          this.analyzeAudio(base64Audio, languageCode).subscribe({
-            next: (transcript) => {
-              observer.next(transcript);
-              observer.complete();
-            },
-            error: (err) => observer.error(err)
-          });
+          try {
+             const result = await this.analyzeWithGemini(base64Audio, targetText, languageCode);
+             observer.next(result);
+             observer.complete();
+          } catch (err) {
+             observer.error(err);
+          }
         };
         reader.onerror = (err) => observer.error(err);
       };
@@ -153,31 +162,50 @@ export class SttService {
     }
   }
 
-  private analyzeAudio(base64Audio: string, languageCode: string): Observable<string> {
-    const payload = {
-      config: {
-        languageCode: languageCode,
-        encoding: 'WEBM_OPUS', // Standard for web audio recording in Chrome/Firefox
-        sampleRateHertz: 48000, // Typical default, but might need adjustment based on browser
-        // enableAutomaticPunctuation: true
-      },
-      audio: {
-        content: base64Audio
-      }
-    };
+  private async analyzeWithGemini(base64Audio: string, targetText: string, languageCode: string): Promise<any> {
+      const prompt = `
+        You are a friendly language tutor for kids.
+        Analyze this audio recording of a child reading the following text: "${targetText}".
+        The target language is "${languageCode}".
 
-    return this.http.post<any>(this.apiUrl, payload).pipe(
-      map(response => {
-        if (response.results && response.results.length > 0) {
-          // Join all alternatives or just take the first result's first alternative
-          return response.results[0].alternatives[0].transcript;
+        Please provide:
+        1. A pronunciation score (0-100).
+        2. A very brief, encouraging feedback message (max 1 sentence).
+        3. A list of words they mispronounced (if any).
+
+        Return ONLY a JSON object:
+        {
+          "score": number,
+          "feedback": "string",
+          "mispronouncedWords": ["word1", "word2"]
         }
-        return '';
-      }),
-      catchError(error => {
-        console.error('STT API Error:', error);
-        return throwError(() => error);
-      })
-    );
+      `;
+
+      const response = await this.genAI.models.generateContent({
+        model: (environment as any).geminiModel || 'gemini-1.5-flash-001',
+        contents: [
+          { text: prompt },
+          { inlineData: { data: base64Audio, mimeType: 'audio/webm' } }
+        ],
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              score: { type: 'NUMBER' },
+              feedback: { type: 'STRING' },
+              mispronouncedWords: { 
+                type: 'ARRAY',
+                items: { type: 'STRING' }
+              }
+            },
+            required: ['score', 'feedback', 'mispronouncedWords']
+          }
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error('No assessment generated');
+      return JSON.parse(text);
   }
 }

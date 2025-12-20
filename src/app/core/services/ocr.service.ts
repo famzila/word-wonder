@@ -1,120 +1,82 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map, switchMap } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable, from, map, switchMap } from 'rxjs';
+import { GoogleGenAI } from '@google/genai';
 import { environment } from '../../../environments/environment';
+
+interface OcrResult {
+  text: string;
+  languageCode: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class OcrService {
-  private http = inject(HttpClient);
-  // Note: For production, calls to Google Vision should be proxied through a backend
-  // to protect the API key. This client-side implementation is for prototype/demo only.
-  private apiUrl = `https://vision.googleapis.com/v1/images:annotate?key=${environment.googleCloudApiKey}`;
+  private genAI: GoogleGenAI;
 
-  extractText(file: File): Observable<{ text: string, languageCode: string }> {
+  constructor() {
+    this.genAI = new GoogleGenAI({
+      apiKey: environment.googleCloudApiKey
+    });
+  }
+
+  extractText(file: File): Observable<OcrResult> {
     return this.convertFileToBase64(file).pipe(
       switchMap(base64Image => {
-        const payload = {
-          requests: [
-            {
-              image: {
-                content: base64Image
-              },
-              features: [
-                {
-                  type: 'TEXT_DETECTION'
-                }
-              ]
-            }
-          ]
-        };
-
-        return this.http.post<any>(this.apiUrl, payload).pipe(
-          map(response => {
-            console.log('OCR API Response:', response);
-            const annotations = response.responses[0]?.textAnnotations;
-            const fullTextAnnotation = response.responses[0]?.fullTextAnnotation;
-            
-            let detectedLocale = 'en-US';
-
-            // Try to get language from fullTextAnnotation (usually more accurate)
-            if (fullTextAnnotation?.pages?.[0]?.property?.detectedLanguages?.length > 0) {
-              detectedLocale = fullTextAnnotation.pages[0].property.detectedLanguages[0].languageCode;
-            } 
-            // Fallback to textAnnotations
-            else if (annotations && annotations.length > 0 && annotations[0].locale) {
-              detectedLocale = annotations[0].locale;
-            }
-
-            console.log('Detected Locale from OCR:', detectedLocale);
-            
-            // Normalize to BCP-47 format (e.g., 'fr' -> 'fr-FR')
-            const normalizedLocale = this.normalizeLanguageCode(detectedLocale);
-            console.log('Normalized Locale:', normalizedLocale);
-
-            if (annotations && annotations.length > 0) {
-              return {
-                text: annotations[0].description,
-                languageCode: normalizedLocale
-              };
-            }
-            return { text: 'No text found in image.', languageCode: 'en-US' };
-          })
-        );
+        return from(this.processWithGemini(base64Image, file.type));
       })
     );
   }
 
-  /**
-   * Normalize language codes to BCP-47 format expected by Google TTS/STT APIs
-   * Converts 2-letter ISO codes (e.g., 'fr') to full locale codes (e.g., 'fr-FR')
-   */
-  private normalizeLanguageCode(code: string): string {
-    // If already in BCP-47 format (e.g., 'en-US'), return as-is
-    if (code.includes('-')) {
-      return code;
+  private async processWithGemini(base64Image: string, mimeType: string): Promise<OcrResult> {
+    try {
+      const prompt = `
+        Analyze this image and extract all readable text exactly as it appears.
+        CRITICAL RULES:
+        1. Preserve all original spaces, line breaks, and paragraph structure. 
+        2. Do NOT merge separate written lines into a single word (e.g. "Title" and "Subtitle" should be separated by a newline).
+        3. Determine the primary language.
+        
+        Return ONLY a JSON object with this structure:
+        {
+          "text": "The extracted text with original formatting preserved",
+          "languageCode": "The BCP-47 language code"
+        }
+      `;
+
+      const response = await this.genAI.models.generateContent({
+        model: (environment as any).geminiModel || 'gemini-1.5-flash-001',
+        contents: [
+          { text: prompt },
+          { inlineData: { data: base64Image, mimeType: mimeType } }
+        ],
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              text: { type: 'STRING' },
+              languageCode: { type: 'STRING' }
+            },
+            required: ['text', 'languageCode']
+          }
+        }
+      });
+
+      const responseText = response.text;
+      if (!responseText) {
+        throw new Error('Empty response from Gemini');
+      }
+
+      return JSON.parse(responseText) as OcrResult;
+
+    } catch (error) {
+      console.error('OCR Gemini Error:', error);
+      return { 
+        text: 'Could not extract text from image.', 
+        languageCode: 'en-US' 
+      };
     }
-
-    // Map common 2-letter codes to BCP-47 format
-    const languageMap: { [key: string]: string } = {
-      'en': 'en-US',
-      'fr': 'fr-FR',
-      'es': 'es-ES',
-      'de': 'de-DE',
-      'it': 'it-IT',
-      'pt': 'pt-PT',
-      'nl': 'nl-NL',
-      'pl': 'pl-PL',
-      'ru': 'ru-RU',
-      'ja': 'ja-JP',
-      'ko': 'ko-KR',
-      'zh': 'zh-CN',
-      'ar': 'ar-SA',
-      'hi': 'hi-IN',
-      'tr': 'tr-TR',
-      'sv': 'sv-SE',
-      'da': 'da-DK',
-      'fi': 'fi-FI',
-      'no': 'nb-NO',
-      'cs': 'cs-CZ',
-      'el': 'el-GR',
-      'he': 'he-IL',
-      'th': 'th-TH',
-      'vi': 'vi-VN',
-      'id': 'id-ID',
-      'ms': 'ms-MY',
-      'uk': 'uk-UA',
-      'ro': 'ro-RO',
-      'hu': 'hu-HU',
-      'sk': 'sk-SK',
-      'bg': 'bg-BG',
-      'hr': 'hr-HR',
-      'sr': 'sr-RS',
-      'ca': 'ca-ES',
-    };
-
-    return languageMap[code.toLowerCase()] || 'en-US';
   }
 
   private convertFileToBase64(file: File): Observable<string> {
