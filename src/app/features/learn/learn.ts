@@ -14,6 +14,7 @@ import { TextDisplay } from './components/text-display/text-display.component';
 import { PlayerControls } from './components/player-controls/player-controls.component';
 import { PracticeControls } from './components/practice-controls/practice-controls.component';
 import { WordDetailModal } from '../../shared/components/word-detail-modal/word-detail-modal';
+import { FeedbackModal } from './components/feedback-modal/feedback-modal.component';
 import { Word } from '../../shared/models/word.model';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -25,6 +26,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     PlayerControls, 
     PracticeControls,
     WordDetailModal,
+    FeedbackModal,
     TranslatePipe
   ],
   providers: [LearnStore],
@@ -274,6 +276,10 @@ export class Learn implements OnDestroy {
         // Reset state
         this.lastHighConfidenceIndex = -1;
         
+        // Start Audio Recording for Gemini Analysis
+        await this.sttService.startRecording();
+
+        // Start Real-time recognition for navigation
         this.recognitionSubscription = this.sttService.startRealtimeRecognition(this.store.languageCode())
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
@@ -321,7 +327,6 @@ export class Learn implements OnDestroy {
                         const skippedIndices: number[] = [];
                         for (let j = 0; j < offset; j++) {
                             const skippedIndex = this.currentReadingPosition + j;
-                            this.detectedErrors.add(skippedIndex);
                             skippedIndices.push(skippedIndex);
                         }
                         
@@ -400,8 +405,39 @@ export class Learn implements OnDestroy {
         this.recognitionSubscription.unsubscribe();
         this.recognitionSubscription = null;
     }
-    
-    // Keep the current word index and errors visible
+
+    // Stop and Analyze with Gemini
+    this.sttService.stopAndAnalyze(this.store.text(), this.store.languageCode())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result: any) => {
+          // Save result to store for UI display
+          this.store.setPronunciationResult(result.score, result.feedback);
+          
+          // Highlight mispronounced words from Gemini Analysis
+          if (result.mispronouncedWords && Array.isArray(result.mispronouncedWords)) {
+            // ... (existing highlight logic) ...
+             const targetWords = this.store.text().toLowerCase().split(/\s+/).map(w => w.replace(/[.,!?]/g, ''));
+             const currentErrors = new Set(this.store.mispronuncedWords());
+             
+             result.mispronouncedWords.forEach((word: string) => {
+                const cleanMispronounced = word.toLowerCase().replace(/[.,!?]/g, '');
+                targetWords.forEach((target, idx) => {
+                    if (target === cleanMispronounced) {
+                        currentErrors.add(idx);
+                    }
+                });
+             });
+             
+             this.store.setMispronuncedWords(Array.from(currentErrors));
+          }
+        },
+        error: (err) => console.error('Analysis failed', err)
+      });
+  }
+
+  closeFeedback() {
+    this.store.setPronunciationResult(null, null);
   }
 
   ngOnDestroy(): void {

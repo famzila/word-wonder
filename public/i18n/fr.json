@@ -64,5 +64,12 @@
       "title": "Magie du Jardin",
       "content": "Dans le jardin magique, de belles fleurs fleurissent chaque jour. Les papillons dansent dans l'air. Les oiseaux chantent de douces chansons."
     }
+  },
+  "feedback": {
+    "amazing": "Incroyable !",
+    "great_job": "Beau travail !",
+    "good_effort": "Bel effort !",
+    "keep_practicing": "Continue de t'entraîner !",
+    "continue": "Continuer"
   }
 }

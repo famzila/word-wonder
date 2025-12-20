@@ -64,5 +64,12 @@
       "title": "Magie du Jardin",
       "content": "In the magic garden, beautiful flowers bloom every day. The butterflies dance in the air. The birds sing sweet songs."
     }
+  },
+  "feedback": {
+    "amazing": "Amazing!",
+    "great_job": "Great Job!",
+    "good_effort": "Good Effort!",
+    "keep_practicing": "Keep Practicing!",
+    "continue": "Continue"
   }
 }

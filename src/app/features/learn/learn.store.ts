@@ -1,5 +1,5 @@
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { computed, inject } from '@angular/core';
+import { patchState, signalStore, withComputed, withMethods, withState, withHooks } from '@ngrx/signals';
+import { computed, inject, effect } from '@angular/core';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap, switchMap, map } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
@@ -23,7 +23,13 @@ interface LearnState {
   selectedWordDefinition: string | null;
   selectedWordImage: string | null;
   isWordLoading: boolean;
+
+  // Pronunciation Feedback State
+  pronunciationScore: number | null;
+  pronunciationFeedback: string | null;
 }
+
+const STORAGE_KEY_SESSION = 'word-wonder-last-session';
 
 const initialState: LearnState = {
   mode: 'listen',
@@ -34,11 +40,13 @@ const initialState: LearnState = {
   transcript: '',
   mispronuncedWords: [],
   languageCode: 'en-US', // Default language
-  // Default text, this might be loaded from a service later
+  // Default text, will be overwritten by storage if available
   text: 'The fluffy cat sat on the warm mat. It was a sunny day and the cat was happy. The cat liked to play with the red ball.', 
   selectedWordDefinition: null,
   selectedWordImage: null,
   isWordLoading: false,
+  pronunciationScore: null,
+  pronunciationFeedback: null
 };
 
 export const LearnStore = signalStore(
@@ -78,6 +86,9 @@ export const LearnStore = signalStore(
         updates.languageCode = languageCode;
       }
       patchState(store, updates);
+    },
+    setPronunciationResult(score: number | null, feedback: string | null): void {
+        patchState(store, { pronunciationScore: score, pronunciationFeedback: feedback });
     },
     reset(): void {
       patchState(store, { 
@@ -124,5 +135,33 @@ export const LearnStore = signalStore(
               }
           }
       };
+  }),
+  withHooks({
+    onInit(store) {
+      // 1. Restore session from localStorage
+      const savedSession = localStorage.getItem(STORAGE_KEY_SESSION);
+      if (savedSession) {
+        try {
+          const parsed = JSON.parse(savedSession);
+          if (parsed.text && parsed.languageCode) {
+            patchState(store, { 
+              text: parsed.text, 
+              languageCode: parsed.languageCode 
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse saved session', e);
+        }
+      }
+
+      // 2. Persist session on change
+      effect(() => {
+        const text = store.text();
+        const languageCode = store.languageCode();
+        // Only save if it's not the default text (to avoid overwriting valid data with defaults if logic changes)
+        // or just always save. Let's always save for consistency.
+        localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify({ text, languageCode }));
+      });
+    }
   })
 );

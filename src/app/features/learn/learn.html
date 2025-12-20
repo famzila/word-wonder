@@ -66,6 +66,7 @@
     ></app-practice-controls>
   }
 
+  <!-- Word Detail Modal -->
   <app-word-modal 
     [word]="selectedWord" 
     [languageCode]="store.languageCode()"
@@ -73,5 +74,15 @@
     [imageUrl]="store.selectedWordImage()"
     [isLoading]="store.isWordLoading()"
   ></app-word-modal>
+
+  <!-- Pronunciation Feedback Modal -->
+  @if (store.pronunciationScore() !== null) {
+    <app-feedback-modal
+        [score]="store.pronunciationScore()!"
+        [feedback]="store.pronunciationFeedback()!"
+        [isOpen]="true"
+        (close)="closeFeedback()"
+    ></app-feedback-modal>
+  }
 
 </div>

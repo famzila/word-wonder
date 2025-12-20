@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withMethods, withState, withHooks } from '@ngrx/signals';
 import { Story } from '../../shared/models/word.model';
 import { OcrService } from '../services/ocr.service';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -74,18 +74,40 @@ export const StoryStore = signalStore(
           ocrService.extractText(file).pipe(
             tapResponse({
               next: ({ text, languageCode }: { text: string, languageCode: string }) => {
+                // 1. Generate dynamic title from first 4 words
+                const words = text.split(/\s+/).slice(0, 4);
+                const title = words.join(' ') + (words.length >= 4 ? '...' : '');
+
+                // 2. Check for duplicates
+                const existingStory = store.stories().find(s => s.content.trim() === text.trim());
+                
+                if (existingStory) {
+                   // If duplicate, just select it without adding
+                   patchState(store, { 
+                     ocrStatus: 'success', 
+                     currentStory: existingStory
+                   });
+                   return;
+                }
+
                 const newStory: Story = {
                   id: Date.now().toString(),
-                  title: 'Captured Text',
+                  title: title,
                   content: text,
                   difficulty: 'medium', // Default
                   themeColor: 'bg-secondary/10 text-secondary',
                   languageCode: languageCode // Store the detected language
                 };
+                
+                // Save custom story to local storage
+                const existingCustomStories = JSON.parse(localStorage.getItem('word-wonder-custom-stories') || '[]');
+                const updatedCustomStories = [newStory, ...existingCustomStories];
+                localStorage.setItem('word-wonder-custom-stories', JSON.stringify(updatedCustomStories));
+
                 patchState(store, { 
                   ocrStatus: 'success', 
                   currentStory: newStory,
-                  stories: [newStory, ...store.stories()] // Add to list (optional)
+                  stories: [newStory, ...store.stories()] 
                 });
               },
               error: (err: any) => {
@@ -100,5 +122,20 @@ export const StoryStore = signalStore(
         )
       )
     )
-  }))
+  })),
+  withHooks({
+    onInit(store) {
+      const savedCustomStories = localStorage.getItem('word-wonder-custom-stories');
+      if (savedCustomStories) {
+          try {
+              const customStories: Story[] = JSON.parse(savedCustomStories);
+              patchState(store, {
+                  stories: [...customStories, ...store.stories()]
+              });
+          } catch (e) {
+              console.error('Failed to parse custom stories', e);
+          }
+      }
+    }
+  })
 );
