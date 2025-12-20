@@ -16,42 +16,54 @@ import { TranslateModule } from '@ngx-translate/core';
       <div class="modal-box bg-base-200 p-8 overflow-hidden relative rounded-[2.5rem] shadow-2xl max-w-sm mx-auto">
         
         <!-- Close Button -->
-        <button (click)="close()" aria-label="Close modal" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-neutral/40 hover:bg-neutral/10">
+        <button (click)="close()" aria-label="Close modal" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-neutral/40 hover:bg-neutral/10 z-10">
            <lucide-angular [img]="XIcon" class="w-5 h-5"></lucide-angular>
         </button>
 
         <!-- Word Title -->
         <div class="text-center mb-6">
-             <h2 id="modal-title" class="font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-fun tracking-tighter drop-shadow-sm select-none capitalize">
+             <h2 id="modal-title" class="font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-fun tracking-tighter select-none capitalize">
                {{ word()?.original }}
              </h2>
         </div>
 
         <div class="space-y-6">
             
-            <!-- Syllables Chip -->
-            <div class="bg-warning/10 rounded-[2rem] p-6 text-center">
-                <p class="text-sm font-bold text-neutral/60 mb-3">{{ 'word_modal.syllables' | translate }}</p>
-                <div class="flex justify-center flex-wrap gap-2">
-                    @for (syl of word()?.syllables; track $index) {
-                      <span class="badge badge-lg bg-orange-200/50 text-neutral font-heading text-xl font-bold py-6 px-6 border-0">
-                        {{ syl }}
-                      </span>
-                    } @empty {
-                       <span class="badge badge-lg bg-orange-200/50 text-neutral font-heading text-xl font-bold py-6 px-6 border-0">
-                        {{ word()?.original }}
-                      </span>
-                    }
-                </div>
+            <!-- Image Section -->
+            @if (isLoading()) {
+               <div class="skeleton h-48 w-full rounded-[2rem]"></div>
+            } @else {
+               @if (imageUrl()) {
+                 <div class="relative w-full h-48 rounded-[2rem] overflow-hidden shadow-lg">
+                   <img [src]="imageUrl()" alt="Illustration for {{ word()?.original }}" class="w-full h-full object-cover">
+                 </div>
+               }
+            }
+
+            <!-- AI Definition -->
+            <div class="bg-info/10 rounded-[2rem] p-6 text-center shadow-inner">
+                <p class="text-xs font-bold text-teal-700/60 mb-2 tracking-wide uppercase">{{ 'word_modal.meaning_label' | translate }}</p>
+                @if (isLoading()) {
+                   <div class="flex flex-col gap-2 items-center">
+                     <div class="skeleton h-4 w-3/4"></div>
+                     <div class="skeleton h-4 w-1/2"></div>
+                   </div>
+                } @else {
+                  <p class="font-medium text-neutral text-lg leading-relaxed">
+                      {{ definition() || word()?.translation }}
+                  </p>
+                }
             </div>
 
-            <!-- Definition -->
-            <div class="bg-info/10 rounded-[2rem] p-6 text-center">
-                <p class="text-sm font-bold text-teal-700/60 mb-2">{{ 'word_modal.meaning_label' | translate }}</p>
-                <p class="font-medium text-neutral text-lg leading-relaxed">
-                    {{ word()?.translation }}
-                </p>
+            <!-- Syllables Chip (Secondary now) -->
+            <div class="flex justify-center flex-wrap gap-2">
+                @for (syl of word()?.syllables; track $index) {
+                  <span class="badge badge-lg bg-orange-100/80 text-orange-800 font-heading text-lg font-bold py-4 px-4 border-0">
+                    {{ syl }}
+                  </span>
+                }
             </div>
+
 
             <div class="flex gap-4 pt-2">
                 <button (click)="speak()" aria-label="Listen to word pronunciation" class="btn btn-secondary border-0 flex-1 rounded-full text-white shadow-button btn-lg h-14">
@@ -94,6 +106,12 @@ export class WordDetailModal {
   private modalRef = viewChild<ElementRef<HTMLDialogElement>>('modalRef');
   word = input<Word | null>(null);
   languageCode = input<string>('en-US');
+  
+  // AI content inputs
+  definition = input<string | null>(null);
+  imageUrl = input<string | null>(null);
+  isLoading = input<boolean>(false);
+
   closeModal = output<void>();
 
   // 3. Signals / Computed
@@ -112,7 +130,7 @@ export class WordDetailModal {
   readonly XIcon = X;
   readonly VolumeIcon = Volume2;
   readonly StarIcon = Star;
-  readonly TrashIcon = Trash2; // Added Trash icon
+  readonly TrashIcon = Trash2; 
 
   // 5. Methods
   open() {

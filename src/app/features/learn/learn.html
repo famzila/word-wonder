@@ -66,6 +66,12 @@
     ></app-practice-controls>
   }
 
-  <app-word-modal [word]="selectedWord" [languageCode]="store.languageCode()"></app-word-modal>
+  <app-word-modal 
+    [word]="selectedWord" 
+    [languageCode]="store.languageCode()"
+    [definition]="store.selectedWordDefinition()"
+    [imageUrl]="store.selectedWordImage()"
+    [isLoading]="store.isWordLoading()"
+  ></app-word-modal>
 
 </div>

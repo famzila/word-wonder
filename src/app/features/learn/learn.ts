@@ -221,6 +221,14 @@ export class Learn implements OnDestroy {
         type: 'other',
         syllables: this.approximateSyllables(cleanWord) // Generate syllables
     };
+    
+    // Load AI definition and image
+    this.store.loadWordDetails(
+      cleanWord, 
+      this.store.text(), 
+      this.store.languageCode()
+    );
+
     this.modalRef()?.open();
   }
 

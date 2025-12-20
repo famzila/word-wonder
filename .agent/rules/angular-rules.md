@@ -7,6 +7,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use strict type checking
 - Prefer type inference when the type is obvious
 - Avoid the `any` type; use `unknown` when type is uncertain
+- Remove unused imports and variable declarations
 
 ## Angular Best Practices
 - Always use Angular CLI to generate components, services, and other files

@@ -1,5 +1,10 @@
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { computed } from '@angular/core';
+import { computed, inject } from '@angular/core';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { pipe, tap, switchMap, map } from 'rxjs';
+import { tapResponse } from '@ngrx/operators';
+import { GeminiService } from '../../core/services/gemini.service';
+import { ImageService } from '../../core/services/image.service';
 
 type LearnMode = 'listen' | 'practice';
 
@@ -13,6 +18,11 @@ interface LearnState {
   text: string;
   languageCode: string; // Language code for TTS/STT (e.g., 'en-US', 'fr')
   mispronuncedWords: number[]; // Indices of words with pronunciation errors
+  
+  // Word Detail State
+  selectedWordDefinition: string | null;
+  selectedWordImage: string | null;
+  isWordLoading: boolean;
 }
 
 const initialState: LearnState = {
@@ -26,6 +36,9 @@ const initialState: LearnState = {
   languageCode: 'en-US', // Default language
   // Default text, this might be loaded from a service later
   text: 'The fluffy cat sat on the warm mat. It was a sunny day and the cat was happy. The cat liked to play with the red ball.', 
+  selectedWordDefinition: null,
+  selectedWordImage: null,
+  isWordLoading: false,
 };
 
 export const LearnStore = signalStore(
@@ -72,8 +85,44 @@ export const LearnStore = signalStore(
         isRecording: false, 
         currentWordIndex: -1, 
         transcript: '',
-        mispronuncedWords: []
+        mispronuncedWords: [],
+        selectedWordDefinition: null,
+        selectedWordImage: null,
+        isWordLoading: false
       });
     }
-  }))
+  })),
+  withMethods((store) => {
+      const geminiService = inject(GeminiService);
+      const imageService = inject(ImageService);
+
+      return {
+          async loadWordDetails(word: string, context: string, lang: string) {
+              patchState(store, { isWordLoading: true, selectedWordDefinition: null, selectedWordImage: null });
+              
+              try {
+                  // 1. Get Definition and Query
+                  const details = await geminiService.generateWordDetails(word, context, lang);
+                  patchState(store, { selectedWordDefinition: details.definition });
+
+                  // 2. Get Image if query exists
+                  if (details.imageSearchQuery) {
+                      imageService.searchImage(details.imageSearchQuery).subscribe({
+                          next: (url) => patchState(store, { selectedWordImage: url, isWordLoading: false }),
+                          error: () => patchState(store, { isWordLoading: false })
+                      });
+                  } else {
+                      patchState(store, { isWordLoading: false });
+                  }
+
+              } catch (err) {
+                  console.error(err);
+                  patchState(store, { 
+                      isWordLoading: false, 
+                      selectedWordDefinition: 'Definition unavailable.' 
+                  });
+              }
+          }
+      };
+  })
 );
