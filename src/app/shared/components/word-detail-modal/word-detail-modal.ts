@@ -5,44 +5,45 @@ import { TtsService } from '../../../core/services/tts.service';
 import { FavoritesStore } from '../../../core/store/favorites.store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-word-modal',
-  imports: [LucideAngularModule, TranslateModule],
+  imports: [LucideAngularModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <dialog #modalRef class="modal modal-bottom sm:modal-middle" aria-labelledby="modal-title">
-      <div class="modal-box bg-base-200 p-8 overflow-hidden relative rounded-[2.5rem] shadow-2xl max-w-sm mx-auto">
+    <dialog #modalRef class="modal modal-bottom sm:modal-middle" aria-labelledby="modal-title" aria-describedby="modal-description">
+      <div class="modal-box">
         
         <!-- Close Button -->
-        <button (click)="close()" aria-label="Close modal" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-neutral/40 hover:bg-neutral/10 z-10">
-           <lucide-angular [img]="XIcon" class="w-5 h-5"></lucide-angular>
-        </button>
+        <form method="dialog">
+          <button aria-label="Close modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            <lucide-angular [img]="XIcon" class="w-5 h-5"></lucide-angular>
+          </button>
+        </form>
 
         <!-- Word Title -->
-        <div class="text-center mb-6">
-             <h2 id="modal-title" class="font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-fun tracking-tighter select-none capitalize">
-               {{ word()?.original }}
-             </h2>
-        </div>
+        <h3 id="modal-title" class="gradient-text-primary font-heading text-4xl font-black tracking-tighter capitalize mb-6 text-center">
+          {{ word()?.original }}
+        </h3>
 
-        <div class="space-y-6">
+        <!-- Modal Content -->
+        <div id="modal-description" class="space-y-4">
             
             <!-- Image Section -->
             @if (isLoading()) {
-               <div class="skeleton h-48 w-full rounded-[2rem]"></div>
+               <div class="skeleton h-48 w-full rounded-2xl"></div>
             } @else {
                @if (imageUrl()) {
-                 <div class="relative w-full h-48 rounded-[2rem] overflow-hidden shadow-lg">
-                   <img [src]="imageUrl()" alt="Illustration for {{ word()?.original }}" class="w-full h-full object-cover">
+                 <div class="relative w-full h-48 rounded-2xl overflow-hidden shadow-lg bg-base-200">
+                   <img [src]="imageUrl()" alt="Illustration for {{ word()?.original }}" class="w-full h-full object-contain">
                  </div>
                }
             }
 
             <!-- AI Definition -->
-            <div class="bg-info/10 rounded-[2rem] p-6 text-center shadow-inner">
-                <p class="text-xs font-bold text-teal-700/60 mb-2 tracking-wide uppercase">{{ 'word_modal.meaning_label' | translate }}</p>
+            <div class="bg-info/10 rounded-2xl p-6 text-center">
+                <p class="text-xs font-bold text-info mb-2 tracking-wide uppercase">{{ 'word_modal.meaning_label' | translate }}</p>
                 @if (isLoading()) {
                    <div class="flex flex-col gap-2 items-center">
                      <div class="skeleton h-4 w-3/4"></div>
@@ -55,43 +56,43 @@ import { TranslateModule } from '@ngx-translate/core';
                 }
             </div>
 
-            <!-- Syllables Chip (Secondary now) -->
-            <div class="flex justify-center flex-wrap gap-2">
-                @for (syl of word()?.syllables; track $index) {
-                  <span class="badge badge-lg bg-orange-100/80 text-orange-800 font-heading text-lg font-bold py-4 px-4 border-0">
-                    {{ syl }}
-                  </span>
-                }
-            </div>
+            <!-- Syllables -->
+            @if (word()?.syllables?.length) {
+              <div class="flex justify-center flex-wrap gap-2">
+                  @for (syl of word()!.syllables; track $index) {
+                    <span class="badge badge-lg badge-warning font-heading text-lg font-bold">
+                      {{ syl }}
+                    </span>
+                  }
+              </div>
+            }
+        </div>
 
-
-            <div class="flex gap-4 pt-2">
-                <button (click)="speak()" aria-label="Listen to word pronunciation" class="btn btn-secondary border-0 flex-1 rounded-full text-white shadow-button btn-lg h-14">
-                    <lucide-angular [img]="VolumeIcon" class="w-6 h-6 fill-current"></lucide-angular>
-                    {{ 'common.listen' | translate }}
-                </button>
-                <button 
-                  (click)="toggleFavorite()" 
-                  aria-label="Toggle favorite status" 
-                  [class.btn-outline]="isFavorite()"
-                  [class.btn-error]="isFavorite()"
-                  [class.bg-gradient-fun]="!isFavorite()"
-                  class="btn border-0 flex-1 rounded-full shadow-button btn-lg h-14 transition-all duration-300">
-                     
-                     <lucide-angular 
-                        [img]="isFavorite() ? TrashIcon : StarIcon" 
-                        class="w-6 h-6 transition-all duration-300"
-                        [class.fill-current]="!isFavorite()"
-                        >
-                     </lucide-angular>
-                     {{ isFavorite() ? ('common.remove' | translate) : ('common.save' | translate) }}
-                </button>
-            </div>
-
+        <!-- Modal Actions -->
+        <div class="modal-action">
+            <button (click)="speak()" aria-label="Listen to word pronunciation" class="btn btn-secondary flex-1">
+                <lucide-angular [img]="VolumeIcon" class="w-5 h-5"></lucide-angular>
+                {{ 'common.listen' | translate }}
+            </button>
+            <button 
+              (click)="toggleFavorite()" 
+              aria-label="Toggle favorite status" 
+              [class.btn-outline]="isFavorite()"
+              [class.btn-error]="isFavorite()"
+              [class.btn-primary]="!isFavorite()"
+              class="btn flex-1">
+                 
+                 <lucide-angular 
+                    [img]="isFavorite() ? TrashIcon : StarIcon" 
+                    class="w-5 h-5"
+                    [class.fill-current]="!isFavorite()">
+                 </lucide-angular>
+                 {{ isFavorite() ? ('common.remove' | translate) : ('common.save' | translate) }}
+            </button>
         </div>
       </div>
-      <form method="dialog" class="modal-backdrop bg-neutral/50">
-        <button (click)="close()">close</button>
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
       </form>
     </dialog>
   `,

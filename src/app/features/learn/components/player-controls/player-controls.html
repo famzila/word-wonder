@@ -7,7 +7,7 @@
     </div>
     <div class="flex items-center gap-4">
       <span class="text-xs font-bold text-neutral/50">Slow</span>
-      <lucide-angular [img]="Turtle" class="w-4 h-4 text-emerald-500"></lucide-angular>
+      <lucide-angular [img]="Turtle" class="w-4 h-4 text-success"></lucide-angular>
       
       <input 
         type="range"
@@ -20,7 +20,7 @@
         class="range range-xs range-primary flex-1" 
       />
       
-      <lucide-angular [img]="Rabbit" class="w-4 h-4 text-orange-500"></lucide-angular>
+      <lucide-angular [img]="Rabbit" class="w-4 h-4 text-primary"></lucide-angular>
       <span class="text-xs font-bold text-neutral/50">Fast</span>
     </div>
   </div>
@@ -48,7 +48,7 @@
   <!-- Main Actions -->
   <div class="flex gap-4">
     <button 
-      class="btn btn-outline btn-lg flex-1 rounded-full border-2 hover:bg-base-200 border-orange-500 text-orange-500"
+      class="btn btn-outline btn-primary btn-lg flex-1"
       (click)="reset.emit()"
     >
       <lucide-angular [img]="RotateCcw" class="w-6 h-6"></lucide-angular>
@@ -56,7 +56,7 @@
     </button>
 
     <button 
-      class="btn btn-lg flex-1 rounded-full border-0 shadow-button text-white bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-500 hover:to-cyan-500"
+      class="btn btn-gradient-secondary flex-1 rounded-full"
       (click)="playToggle.emit()"
     >
       @if (isPlaying()) {

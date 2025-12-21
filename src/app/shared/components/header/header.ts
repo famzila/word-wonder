@@ -9,7 +9,7 @@ import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
     <div class="navbar bg-base-100/80 backdrop-blur-md sticky top-0 z-40 px-4 py-2 min-h-[64px]">
       <div class="navbar-start w-1/4">
         @if (showBack()) {
-          <button (click)="goBack()" class="btn btn-ghost btn-circle text-neutral hover:bg-neutral/10 hover:text-primary transition-colors">
+          <button (click)="goBack()" class="btn btn-ghost btn-circle">
             <lucide-angular [img]="ArrowLeftIcon" class="w-6 h-6" strokeWidth="3"></lucide-angular>
           </button>
         }

@@ -1,30 +1,26 @@
 import { Component, inject, effect } from '@angular/core';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { LucideAngularModule, Sparkles } from 'lucide-angular';
 import { UploadCard } from './components/upload-card/upload-card';
 import { StoryList } from './components/story-list/story-list';
 import { EditText } from './components/edit-text/edit-text';
+import { PageHeader } from '../../shared/components/page-header/page-header';
 import { StoryStore } from '../../core/store/story.store';
 import { Story } from '../../shared/models/word.model';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  imports: [TranslatePipe, LucideAngularModule, UploadCard, StoryList, EditText],
+  imports: [LucideAngularModule, UploadCard, StoryList, EditText, PageHeader],
   template: `
-    <div class="flex flex-col items-center pt-8 px-4 pb-4 space-y-8 animate-fade-in-up w-full max-w-md mx-auto">
+    <div class="p-4 max-w-lg mx-auto flex flex-col gap-6">
       
-      <div class="text-center">
-        <div class="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center shadow-lg mb-4 text-white">
-          <lucide-angular [img]="SparklesIcon" class="w-10 h-10" strokeWidth="2.5"></lucide-angular>
-        </div>
-        <h1 class="text-4xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 tracking-tight pb-1">
-          {{ 'home.title' | translate }}
-        </h1>
-        <p class="text-neutral/60 font-medium mt-1">
-          {{ 'home.subtitle' | translate }} 🌟
-        </p>
-      </div>
+      <!-- Page Header -->
+      <app-page-header 
+        [icon]="SparklesIcon" 
+        title="home.title"
+        subtitle="home.subtitle">
+      </app-page-header>
 
       @if (viewMode === 'edit') {
         <app-edit-text 

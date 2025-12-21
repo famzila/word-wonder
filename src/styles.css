@@ -88,48 +88,165 @@ body {
     min-height: 100vh;
 }
 
-/* Custom Utilities */
+/* ============================================
+   CUSTOM UTILITIES
+   ============================================ */
+
+/* Gradient Backgrounds */
 .bg-gradient-fun {
     background-image: linear-gradient(135deg, hsl(16 90% 60%) 0%, hsl(45 95% 60%) 100%);
 }
 
-.bg-gradient-cool {
-    background-image: linear-gradient(135deg, hsl(174 60% 50%) 0%, hsl(200 80% 70%) 100%);
+/* ============================================
+   PAGE HEADER UTILITIES
+   ============================================ */
+
+.page-header-title {
+    @apply font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 tracking-tight mb-3;
 }
 
-/* Animation Utilities */
-.hover-bounce {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+.page-header-subtitle {
+    @apply text-neutral/60 font-medium text-lg;
 }
 
-.hover-bounce:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-bounce);
+/* ============================================
+   ICON CONTAINER UTILITIES
+   ============================================ */
+
+.icon-container-primary {
+    @apply w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 flex items-center justify-center shadow-lg text-white;
 }
 
-.card-shine {
-    position: relative;
-    overflow: hidden;
+.icon-container-soft {
+    @apply w-16 h-16 rounded-full flex items-center justify-center shadow-sm;
 }
 
-.card-shine::after {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(to bottom right,
-            rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 0) 40%,
-            rgba(255, 255, 255, 0.4) 50%,
-            rgba(255, 255, 255, 0) 60%,
-            rgba(255, 255, 255, 0) 100%);
-    transform: rotate(30deg);
-    transition: transform 0.5s;
-    pointer-events: none;
+/* ============================================
+   CARD UTILITIES
+   ============================================ */
+
+.card-standard {
+    @apply card bg-white shadow-xl border border-base-200;
 }
 
-.card-shine:hover::after {
-    transform: rotate(30deg) translate(20%, 20%);
+.card-rounded {
+    @apply card bg-white shadow-xl rounded-[2rem] border border-base-200;
+}
+
+.card-body-standard {
+    @apply card-body p-6;
+}
+
+.card-body-large {
+    @apply card-body p-8;
+}
+
+/* ============================================
+   BUTTON UTILITIES
+   ============================================ */
+
+.btn-gradient-primary {
+    @apply btn btn-lg border-none text-white bg-gradient-to-r from-orange-400 to-yellow-400 shadow-xl shadow-orange-200 hover:scale-[1.02] active:scale-[0.98] transition-all;
+}
+
+.btn-gradient-secondary {
+    @apply btn btn-lg border-none text-white bg-gradient-to-r from-teal-400 to-cyan-400 shadow-xl shadow-teal-200 hover:scale-[1.02] active:scale-[0.98] transition-all;
+}
+
+/* ============================================
+   TEXT GRADIENT UTILITIES
+   ============================================ */
+
+.gradient-text-primary {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400;
+}
+
+.gradient-text-cool {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-400;
+}
+
+/* ============================================
+   KID-FRIENDLY ANIMATIONS
+   ============================================ */
+
+/* Soft Bounce - Perfect for icons, buttons, success states */
+@keyframes bounce-soft {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* Wiggle - Great for attention-grabbing (errors, new features) */
+@keyframes wiggle {
+
+    0%,
+    100% {
+        transform: rotate(-3deg);
+    }
+
+    50% {
+        transform: rotate(3deg);
+    }
+}
+
+/* Pulse Glow - Excellent for recording buttons or active states */
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 hsl(16 90% 60% / 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 12px hsl(16 90% 60% / 0);
+    }
+}
+
+/* Float - Beautiful for decorative elements or page headers */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    33% {
+        transform: translateY(-10px) rotate(2deg);
+    }
+
+    66% {
+        transform: translateY(-5px) rotate(-2deg);
+    }
+}
+
+/* Animation Utility Classes */
+.animate-bounce-soft {
+    animation: bounce-soft 2s ease-in-out infinite;
+}
+
+.animate-wiggle {
+    animation: wiggle 0.5s ease-in-out;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Hover Variants */
+.hover\:animate-bounce-soft:hover {
+    animation: bounce-soft 0.6s ease-in-out;
+}
+
+.hover\:animate-wiggle:hover {
+    animation: wiggle 0.3s ease-in-out;
 }

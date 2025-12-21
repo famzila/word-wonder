@@ -219,7 +219,7 @@ export class Learn implements OnDestroy {
     this.selectedWord = {
         id: '1',
         original: cleanWord,
-        translation: 'Loading definition...', // In a real app, fetch from specific dictionary API
+        translation: '', // @todo: fetch from specific dictionary API
         type: 'other',
         syllables: this.approximateSyllables(cleanWord) // Generate syllables
     };
@@ -276,8 +276,9 @@ export class Learn implements OnDestroy {
         // Reset state
         this.lastHighConfidenceIndex = -1;
         
-        // Start Audio Recording for Gemini Analysis
-        await this.sttService.startRecording();
+        // TODO: Re-enable when pronunciation feedback is ready (see stopRecording method)
+        // DISABLED: Audio recording for Gemini pronunciation analysis
+        // await this.sttService.startRecording();
 
         // Start Real-time recognition for navigation
         this.recognitionSubscription = this.sttService.startRealtimeRecognition(this.store.languageCode())
@@ -406,7 +407,13 @@ export class Learn implements OnDestroy {
         this.recognitionSubscription = null;
     }
 
-    // Stop and Analyze with Gemini
+    // TODO: Re-enable pronunciation feedback after MVP
+    // Currently disabled because Gemini pronunciation analysis is not providing accurate results.
+    // The feedback modal shows incorrect pronunciation scores and mispronounced words.
+    // This feature needs further refinement and testing before being production-ready.
+    // See: https://github.com/your-repo/issues/XXX (create issue for tracking)
+    
+    /* DISABLED: STT + Gemini Pronunciation Analysis
     this.sttService.stopAndAnalyze(this.store.text(), this.store.languageCode())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -434,6 +441,7 @@ export class Learn implements OnDestroy {
         },
         error: (err) => console.error('Analysis failed', err)
       });
+    */
   }
 
   closeFeedback() {

@@ -1,11 +1,12 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SettingsStore } from '../../core/store/settings.store';
 import { LucideAngularModule, Settings as SettingsIcon, Check, Languages } from 'lucide-angular';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
+import { PageHeader } from '../../shared/components/page-header/page-header';
 
 @Component({
   selector: 'app-settings',
-  imports: [LucideAngularModule, TranslateModule],
+  imports: [LucideAngularModule, TranslatePipe, PageHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings.html',
 })

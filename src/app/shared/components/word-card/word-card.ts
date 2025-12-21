@@ -10,7 +10,7 @@ import { Word } from '../../models/word.model';
       <div class="card-body p-4 flex flex-row items-center gap-4">
         
         <!-- Icon/Thumbnail Placeholder -->
-        <div class="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-500 shrink-0">
+        <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
            <!-- If image exists, show it, else show play icon or similar -->
            @if (word().imageUrl) {
              <img [src]="word().imageUrl" class="w-full h-full object-cover rounded-2xl" />
@@ -29,7 +29,7 @@ import { Word } from '../../models/word.model';
           </p>
           <!-- Tags/Chips -->
            <div class="flex gap-2 mt-1">
-             <span class="badge badge-sm badge-warning/20 text-warning font-bold border-0 text-[10px] px-2 h-5">
+             <span class="badge badge-sm badge-warning/20 text-warning font-bold border-0 px-2 h-5">
                noun
              </span>
            </div>
@@ -37,7 +37,7 @@ import { Word } from '../../models/word.model';
 
         <!-- Actions -->
         <div class="flex flex-col gap-2">
-            <button class="btn btn-circle btn-sm btn-ghost text-secondary hover:bg-secondary/10">
+            <button class="btn btn-circle btn-sm btn-ghost">
                 <lucide-angular [img]="VolumeIcon" class="w-5 h-5"></lucide-angular>
             </button>
         </div>

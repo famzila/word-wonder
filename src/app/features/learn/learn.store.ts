@@ -36,7 +36,7 @@ const initialState: LearnState = {
   isPlaying: false,
   isRecording: false,
   currentWordIndex: -1, // -1 means no word highlighted
-  playbackSpeed: 1.0,
+  playbackSpeed: 0.75,
   transcript: '',
   mispronuncedWords: [],
   languageCode: 'en-US', // Default language

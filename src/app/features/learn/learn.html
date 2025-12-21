@@ -1,37 +1,37 @@
-<div class="min-h-screen pb-20 p-4 max-w-lg mx-auto flex flex-col gap-6">
+<div class="p-4 max-w-lg mx-auto flex flex-col gap-6">
   
   <!-- Header -->
   <div class="flex items-center gap-4 py-2">
-    <button (click)="goBack()" class="btn btn-circle btn-ghost btn-sm">
+    <button (click)="goBack()" aria-label="Go back to home page" class="btn btn-circle btn-ghost btn-sm">
       <lucide-angular [img]="BackIcon" class="w-6 h-6 text-neutral"></lucide-angular>
     </button>
-    <h1 class="text-3xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 tracking-tight">
+    <h1 class="gradient-text-primary text-3xl font-heading font-black tracking-tight">
         @if (store.isListenMode()) { {{ 'learn.mode_listen' | translate }} }
         @else { {{ 'learn.mode_practice' | translate }} }
     </h1>
   </div>
 
   <!-- Tab Switcher -->
-  <div class="grid grid-cols-2 bg-[#FDF6E3] p-2 rounded-[2rem] shadow-inner mb-2">
+  <div role="tablist" class="grid grid-cols-2 bg-base-200 p-2 rounded-[2rem] shadow-inner mb-2" aria-label="Learning mode selection">
     <button 
-      class="btn h-14 rounded-full border-0 transition-all duration-300 text-lg font-bold"
-      [class.bg-secondary]="store.isListenMode()"
-      [class.text-white]="store.isListenMode()"
-      [class.shadow-lg]="store.isListenMode()"
+      role="tab"
+      [attr.aria-selected]="store.isListenMode()"
+      [attr.aria-controls]="'listen-panel'"
+      class="btn btn-lg rounded-full"
+      [class.btn-secondary]="store.isListenMode()"
       [class.btn-ghost]="!store.isListenMode()"
-      [class.text-neutral]="!store.isListenMode()"
       (click)="onTabChange('listen')"
     >
       <lucide-angular [img]="VolumeIcon" class="w-6 h-6"></lucide-angular>
       {{ 'learn.tab_listen' | translate }}
     </button>
     <button 
-      class="btn h-14 rounded-full border-0 transition-all duration-300 text-lg font-bold"
-      [class.bg-primary]="store.isPracticeMode()"
-      [class.text-white]="store.isPracticeMode()"
-      [class.shadow-lg]="store.isPracticeMode()"
+      role="tab"
+      [attr.aria-selected]="store.isPracticeMode()"
+      [attr.aria-controls]="'practice-panel'"
+      class="btn btn-lg rounded-full"
+      [class.btn-primary]="store.isPracticeMode()"
       [class.btn-ghost]="!store.isPracticeMode()"
-      [class.text-neutral]="!store.isPracticeMode()"
       (click)="onTabChange('practice')"
     >
       <lucide-angular [img]="MicIcon" class="w-6 h-6"></lucide-angular>
@@ -49,21 +49,25 @@
 
   <!-- Controls -->
   @if (store.isListenMode()) {
-    <app-player-controls
-      [isPlaying]="store.isPlaying()"
-      [playbackSpeed]="store.playbackSpeed()"
-      [currentWordIndex]="store.currentWordIndex()"
-      [totalWords]="totalWords"
-      (playToggle)="togglePlay()"
-      (reset)="resetAudio()"
-      (speedChange)="onSpeedChange($event)"
-      (positionChange)="onPositionChange($event)"
-    ></app-player-controls>
+    <div id="listen-panel" role="tabpanel" aria-labelledby="listen-tab">
+      <app-player-controls
+        [isPlaying]="store.isPlaying()"
+        [playbackSpeed]="store.playbackSpeed()"
+        [currentWordIndex]="store.currentWordIndex()"
+        [totalWords]="totalWords"
+        (playToggle)="togglePlay()"
+        (reset)="resetAudio()"
+        (speedChange)="onSpeedChange($event)"
+        (positionChange)="onPositionChange($event)"
+      ></app-player-controls>
+    </div>
   } @else {
-    <app-practice-controls
-      [isRecording]="store.isRecording()"
-      (toggleRecording)="toggleRecording()"
-    ></app-practice-controls>
+    <div id="practice-panel" role="tabpanel" aria-labelledby="practice-tab">
+      <app-practice-controls
+        [isRecording]="store.isRecording()"
+        (toggleRecording)="toggleRecording()"
+      ></app-practice-controls>
+    </div>
   }
 
   <!-- Word Detail Modal -->

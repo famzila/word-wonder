@@ -1,5 +1,5 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
-import { LucideAngularModule, Mic } from 'lucide-angular';
+import { LucideAngularModule, Mic, MicOff } from 'lucide-angular';
 
 @Component({
   selector: 'app-practice-controls',
@@ -10,6 +10,7 @@ import { LucideAngularModule, Mic } from 'lucide-angular';
       
       <button 
         class="w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg relative"
+        [class.animate-pulse-glow]="isRecording()"
         [class.bg-error]="isRecording()"
         [class.text-white]="true"
         [class.bg-primary]="!isRecording()"
@@ -23,12 +24,15 @@ import { LucideAngularModule, Mic } from 'lucide-angular';
           <span class="absolute inset-0 rounded-full border-4 border-orange-300/60"></span>
         }
         
-        <lucide-angular [img]="Mic" class="w-10 h-10 relative z-10" strokeWidth="3"></lucide-angular>
+        <lucide-angular [img]="isRecording() ? MicOff : Mic" class="w-10 h-10 relative z-10" strokeWidth="3"></lucide-angular>
       </button>
 
-      <p class="text-neutral/60 font-bold animate-pulse" [class.invisible]="!isRecording()">
-        Listening...
-      </p>
+
+      @if (isRecording()) {
+        <p class="text-neutral/60 font-bold animate-pulse">
+          Listening...
+        </p>
+      }
       
       @if (!isRecording()) {
          <p class="text-neutral/40 font-bold">
@@ -44,4 +48,5 @@ export class PracticeControls {
   toggleRecording = output<void>();
 
   readonly Mic = Mic;
+  readonly MicOff = MicOff;
 }

@@ -3,11 +3,12 @@ import { LucideAngularModule, Volume2, Trash2, Star } from 'lucide-angular';
 import { FavoritesStore, FavoriteWord } from '../../core/store/favorites.store';
 import { TtsService } from '../../core/services/tts.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
+import { PageHeader } from '../../shared/components/page-header/page-header';
 
 @Component({
   selector: 'app-favorites',
-  imports: [LucideAngularModule, TranslateModule],
+  imports: [LucideAngularModule, TranslatePipe, PageHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './favorites.html',
 })

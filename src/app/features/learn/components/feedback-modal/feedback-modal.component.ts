@@ -30,7 +30,7 @@ import { TranslatePipe } from '@ngx-translate/core';
           </div>
 
           <!-- Title -->
-          <h3 id="feedback-title" class="font-bold text-2xl mt-2">{{ titleKey() | translate }}</h3>
+          <h3 id="feedback-title" class="font-heading font-bold text-2xl mt-2">{{ titleKey() | translate }}</h3>
 
           <!-- Feedback Text -->
           <p class="py-2 text-base-content/80 text-lg leading-relaxed max-w-xs">

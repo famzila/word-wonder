@@ -1,14 +1,14 @@
 import { Component, input, output, effect, signal } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { LucideAngularModule, Sparkles } from 'lucide-angular';
 
 
 @Component({
   selector: 'app-edit-text',
-  imports: [TranslateModule, LucideAngularModule],
+  imports: [TranslatePipe, LucideAngularModule],
   template: `
-    <div class="card bg-white shadow-xl border border-base-200 animate-fade-in-up w-full max-w-2xl mx-auto">
-      <div class="card-body p-8">
+    <div class="card-standard animate-fade-in-up w-full max-w-2xl mx-auto">
+      <div class="card-body-large">
         
         <h2 class="font-heading text-2xl text-neutral font-black mb-6 text-center">
           {{ 'edit_text.title' | translate }}
@@ -26,12 +26,12 @@ import { LucideAngularModule, Sparkles } from 'lucide-angular';
 
         <div class="flex flex-row gap-6 justify-center">
           <!-- Back Button -->
-          <button (click)="back.emit()" class="btn btn-lg bg-white border-2 border-orange-100 hover:border-orange-200 hover:bg-orange-50 text-orange-400 rounded-2xl flex-1 font-sans font-medium h-16 text-lg">
+          <button (click)="back.emit()" class="btn btn-lg btn-outline btn-primary flex-1 text-lg">
             {{ 'common.back' | translate }}
           </button>
 
           <!-- Start Learning Button -->
-          <button (click)="start.emit()" class="btn btn-lg border-none text-white rounded-2xl flex-1 font-sans font-medium shadow-xl shadow-orange-200 hover:scale-[1.02] active:scale-[0.98] transition-all bg-gradient-to-r from-orange-400 to-yellow-400 h-16 text-lg whitespace-nowrap">
+          <button (click)="start.emit()" class="btn btn-gradient-primary flex-1 text-lg whitespace-nowrap">
             <lucide-angular [img]="SparklesIcon" class="w-6 h-6 mr-2"></lucide-angular>
             {{ 'edit_text.start_btn' | translate }}
           </button>

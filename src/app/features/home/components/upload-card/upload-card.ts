@@ -1,13 +1,13 @@
 import { Component, output } from '@angular/core';
 import { LucideAngularModule, Upload, Camera } from 'lucide-angular';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-upload-card',
-  imports: [LucideAngularModule, TranslateModule],
+  imports: [LucideAngularModule, TranslatePipe],
   template: `
-    <div class="card bg-white shadow-xl border border-base-200">
-      <div class="card-body items-center text-center p-8">
+    <div class="card-standard">
+      <div class="card-body-large items-center text-center">
         
         <h2 class="font-heading text-xl text-neutral font-black mb-6">
           {{ 'home.upload_card.title' | translate }}

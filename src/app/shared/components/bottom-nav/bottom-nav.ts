@@ -7,33 +7,43 @@ import { TranslateModule } from '@ngx-translate/core';
   selector: 'app-bottom-nav',
   imports: [RouterLink, RouterLinkActive, LucideAngularModule, TranslateModule],
   template: `
-    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)] z-50 border-t border-white/20 flex flex-row justify-center gap-4 items-center h-24 px-4 py-4">
-      
-      <!-- Home -->
-      <a routerLink="/home" routerLinkActive="active" class="group flex flex-col items-center justify-center w-20 h-20 rounded-3xl transition-all duration-300 text-neutral/40 hover:text-primary [&.active]:bg-orange-50 [&.active]:text-primary ">
-        <lucide-angular [img]="HouseIcon" class="w-7 h-7 mb-1.5 transition-transform duration-300 group-[.active]:scale-110" strokeWidth="2.5"></lucide-angular>
-        <span class="font-heading text-[11px] font-medium">{{ 'common.nav.home' | translate }}</span>
-      </a>
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg shadow-2xl z-50 border-t border-white/20" aria-label="Main navigation">
+      <ul class="flex flex-row justify-around items-center h-24 px-4 py-4 list-none m-0">
+        
+        <!-- Home -->
+        <li>
+          <a routerLink="/home" routerLinkActive="active" class="group flex flex-col items-center justify-center w-15 h-15 rounded-3xl transition-all duration-300 text-neutral/40 hover:text-primary [&.active]:bg-primary/10 [&.active]:text-primary ">
+            <lucide-angular [img]="HouseIcon" class="transition-transform duration-300 group-[.active]:scale-110" strokeWidth="2.5"></lucide-angular>
+            <span class="font-heading text-xs font-medium">{{ 'common.nav.home' | translate }}</span>
+          </a>
+        </li>
 
-      <!-- Learn -->
-      <a routerLink="/learn" routerLinkActive="active" class="group flex flex-col items-center justify-center w-20 h-20 rounded-3xl transition-all duration-300 text-neutral/40 hover:text-secondary [&.active]:bg-blue-50 [&.active]:text-secondary ">
-        <lucide-angular [img]="BookIcon" class="w-7 h-7 mb-1.5 transition-transform duration-300 group-[.active]:scale-110" strokeWidth="2.5"></lucide-angular>
-        <span class="font-heading text-[11px] font-medium">{{ 'common.nav.learn' | translate }}</span>
-      </a>
+        <!-- Learn -->
+        <li>
+          <a routerLink="/learn" routerLinkActive="active" class="group flex flex-col items-center justify-center w-20 h-20 rounded-3xl transition-all duration-300 text-neutral/40 hover:text-secondary [&.active]:bg-secondary/10 [&.active]:text-secondary ">
+            <lucide-angular [img]="BookIcon" class="transition-transform duration-300 group-[.active]:scale-110" strokeWidth="2.5"></lucide-angular>
+            <span class="font-heading text-xs font-medium">{{ 'common.nav.learn' | translate }}</span>
+          </a>
+        </li>
 
-      <!-- Favorites -->
-      <a routerLink="/favorites" routerLinkActive="active" class="group flex flex-col items-center justify-center w-20 h-20 rounded-3xl transition-all duration-300 text-neutral/40 hover:text-accent [&.active]:bg-yellow-50 [&.active]:text-accent ">
-        <lucide-angular [img]="StarIcon" class="w-7 h-7 mb-1.5 transition-transform duration-300 group-[.active]:scale-110" strokeWidth="2.5"></lucide-angular>
-        <span class="font-heading text-[11px] font-medium">{{ 'common.nav.favorites' | translate }}</span>
-      </a>
+        <!-- Favorites -->
+        <li>
+          <a routerLink="/favorites" routerLinkActive="active" class="group flex flex-col items-center justify-center w-20 h-20 rounded-3xl transition-all duration-300 text-neutral/40 hover:text-accent [&.active]:bg-accent/10 [&.active]:text-accent ">
+            <lucide-angular [img]="StarIcon" class="transition-transform duration-300 group-[.active]:scale-110" strokeWidth="2.5"></lucide-angular>
+            <span class="font-heading text-xs font-medium">{{ 'common.nav.favorites' | translate }}</span>
+          </a>
+        </li>
 
-      <!-- Settings -->
-      <a routerLink="/settings" routerLinkActive="active" class="group flex flex-col items-center justify-center w-20 h-20 rounded-3xl transition-all duration-300 text-neutral/40 hover:text-neutral [&.active]:bg-gray-100 [&.active]:text-neutral ">
-        <lucide-angular [img]="SettingsIcon" class="w-7 h-7 mb-1.5 transition-transform duration-300 group-[.active]:scale-110" strokeWidth="2.5"></lucide-angular>
-        <span class="font-heading text-[11px] font-medium">{{ 'common.nav.settings' | translate }}</span>
-      </a>
+        <!-- Settings -->
+        <li>
+          <a routerLink="/settings" routerLinkActive="active" class="group flex flex-col items-center justify-center w-20 h-20 rounded-3xl transition-all duration-300 text-neutral/40 hover:text-neutral [&.active]:bg-neutral/10 [&.active]:text-neutral ">
+            <lucide-angular [img]="SettingsIcon" class="transition-transform duration-300 group-[.active]:scale-110" strokeWidth="2.5"></lucide-angular>
+            <span class="font-heading text-xs font-medium">{{ 'common.nav.settings' | translate }}</span>
+          </a>
+        </li>
 
-    </div>
+      </ul>
+    </nav>
   `,
   styles: [`
     :host { display: block; }

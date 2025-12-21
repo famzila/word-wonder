@@ -1,25 +1,13 @@
 <div class="min-h-screen bg-base-100 pb-24">
   <!-- Header Section -->
-  <header class="pt-12 px-6 pb-8 text-center bg-base-100">
-    <div class="bg-warning/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-        <!-- We can use a star or book icon here, sticking to book for consistency or star for favorites -->
-        <lucide-angular [img]="StarIcon" class="w-8 h-8 text-orange-400"></lucide-angular>
-    </div>
-    
-    <h1 class="font-heading text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400 tracking-tight mb-3">
-      {{ 'favorites.title' | translate }}
-    </h1>
-    
-    <p class="text-neutral/60 font-medium text-lg">
-      {{ 'favorites.subtitle' | translate }}
-    </p>
-
-    <div class="mt-4 inline-block">
-        <span class="badge bg-white border-0 shadow-sm text-neutral/50 font-bold px-4 py-3 h-auto">
-            {{ count() }} {{ 'favorites.saved_suffix' | translate }}
-        </span>
-    </div>
-  </header>
+  <app-page-header 
+    [icon]="StarIcon" 
+    title="favorites.title"
+    subtitle="favorites.subtitle"
+    [badge]="count() + ' ' + ('favorites.saved_suffix' | translate)"
+    iconBgColor="bg-warning/10"
+    iconColor="text-orange-400">
+  </app-page-header>
 
   <!-- Content -->
   <main class="px-6 max-w-md mx-auto space-y-4">
@@ -49,14 +37,14 @@
                     <button 
                         (click)="play(word)"
                         aria-label="Play pronunciation"
-                        class="btn btn-circle btn-lg btn-secondary border-0 text-white shadow-button w-12 h-12 min-h-0">
+                        class="btn btn-circle btn-secondary">
                             <lucide-angular [img]="VolumeIcon" class="w-5 h-5 fill-current"></lucide-angular>
                     </button>
                     
                     <button 
                         (click)="delete(word.id)" 
                         aria-label="Remove from favorites"
-                        class="btn btn-circle btn-lg btn-outline btn-error w-12 h-12 min-h-0">
+                        class="btn btn-circle btn-outline btn-error">
                             <lucide-angular [img]="TrashIcon" class="w-5 h-5"></lucide-angular>
                     </button>
                 </div>
