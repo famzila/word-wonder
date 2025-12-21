@@ -1,9 +1,6 @@
 ---
-name: angular-feature-from-mockup
 description: This skill should be used when users provide mockups and feature specifications for implementing Angular features. It guides systematic analysis, planning, and step-by-step implementation of UI features based on visual designs and requirements.
 ---
-
-# Angular Feature Implementation from Mockup
 
 Implement Angular features systematically from mockups and specifications by analyzing requirements, identifying technical decisions, and creating detailed implementation plans.
 
@@ -240,12 +237,6 @@ For each new requirement, determine:
 - ❌ Creating inconsistent component APIs (follow existing patterns)
 - ❌ Inventing new state patterns (follow established ones)
 
-Reference project patterns from:
-- `references/tts-service-example.md` for service structure
-- `references/stt-service-example.md` for async browser API integration
-- Other reference files for component and state patterns
-
-Note: you can use the reference files as a starting point, but you should not copy them verbatim. You should use them as a guide to understand the patterns and best practices used in the project.
 
 **Document refactoring needs:**
 When the audit reveals components/services that should be refactored:
@@ -293,47 +284,3 @@ Generate high-quality, context-rich prompts for each implementation step.
 **Acceptance Criteria**:
 - [ ] [Testable criterion 1]
 - [ ] [Testable criterion 2]
-
-**Reference Materials**:
-- See `references/[relevant-file].md` for [pattern name]
-- Example: [Code snippet or file reference]
-```
-
-#### Prompt Quality Guidelines
-
-High-quality prompts should:
-- Be self-contained (include all necessary context)
-- Reference specific files and code patterns
-- Provide concrete examples when helpful
-- Specify expected outputs clearly
-- Include error handling considerations
-- Address edge cases explicitly
-- Follow project conventions consistently
-
-### Phase 4: Plan Review & Iteration
-
-Before implementation begins:
-
-1. **Present the complete plan** for user review
-2. **Highlight critical decisions** that need confirmation
-3. **Identify risks or unknowns** that may require research
-4. **Request feedback** on step ordering and priorities
-5. **Iterate based on feedback** before starting implementation
-
-
-## Success Criteria
-
-A complete implementation plan should:
-- ✅ Be implementable step-by-step without backtracking
-- ✅ Have clear boundaries and dependencies between steps
-- ✅ Reuse existing patterns and components where possible
-- ✅ Consider edge cases and error states
-- ✅ Result in maintainable, testable code
-- ✅ Follow project conventions consistently
-- ✅ Take into account agent rules
-- ✅ Include proper user feedback for all interactions
-- ✅ Handle loading and error states appropriately
-
-
-**Output:**
-Comprehensive implementation plan with prioritized steps, each containing a self-contained prompt ready for execution.

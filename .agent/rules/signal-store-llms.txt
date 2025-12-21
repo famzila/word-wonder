@@ -1,0 +1,3792 @@
+# @ngrx/signals
+
+NgRx Signals is a standalone library that provides a reactive state management solution and a set of utilities for Angular Signals.
+
+## Key Principles
+
+- **Simple and Intuitive:** Designed with ease of use in mind, NgRx Signals provides a straightforward and intuitive API for developers to efficiently work with Angular Signals.
+- **Lightweight and Performant:** Keep your application size optimal with a lightweight library that adds minimal overhead to your projects and performs efficiently.
+- **Declarative:** NgRx Signals is built around the concept of declarative programming, ensuring clean and concise code.
+- **Modular, Extensible, and Scalable:** Modularity and extensibility are the guiding principles of this library. NgRx Signals enables the creation of independent building blocks that can be easily combined for flexible and scalable implementations.
+- **Opinionated, but Flexible:** Strike a balance between flexibility and opinionation, offering customization where needed while providing thoughtful conventions for a smooth development experience.
+- **Type-safe:** NgRx Signals is designed with a strong focus on type safety, ensuring the prevention of errors and misuse at compile time.
+
+## Installation
+
+Detailed installation instructions can be found on the [Installation](guide/signals/install) page.
+
+## Main Features
+
+- [SignalStore](guide/signals/signal-store): A fully-featured state management solution that provides native support for Angular Signals and offers a robust way to manage application state.
+- [SignalState](guide/signals/signal-state): A lightweight utility for managing signal-based state in Angular components and services in a concise and minimalistic manner.
+- [RxJS Integration](guide/signals/rxjs-integration): A plugin for opt-in integration with RxJS, enabling easier handling of asynchronous side effects.
+- [Entities](guide/signals/signal-store/entity-management): A plugin for manipulating and querying entity collections in a simple and performant way.
+- [Events](guide/signals/signal-store/events): A plugin for event-based state management.
+# SignalStore
+
+NgRx SignalStore is a fully-featured state management solution that offers a robust way to manage application state.
+With its native support for Signals, it provides the ability to define stores in a clear and declarative manner.
+The simplicity and flexibility of SignalStore, coupled with its opinionated and extensible design, establish it as a versatile solution for effective state management in Angular.
+
+## Creating a Store
+
+A SignalStore is created using the `signalStore` function. This function accepts a sequence of store features.
+Through the combination of store features, the SignalStore gains state, properties, and methods, allowing for a flexible and extensible store implementation.
+Based on the utilized features, the `signalStore` function returns an injectable service that can be provided and injected where needed.
+
+The `withState` feature is used to add state slices to the SignalStore.
+This feature accepts initial state as an input argument. As with `signalState`, the state's type must be a record/object literal.
+
+<code-example header="book-search-store.ts">
+
+import { signalStore, withState } from '@ngrx/signals';
+import { Book } from './book';
+
+type BookSearchState = {
+  books: Book[];
+  isLoading: boolean;
+  filter: { query: string; order: 'asc' | 'desc' };
+};
+
+const initialState: BookSearchState = {
+  books: [],
+  isLoading: false,
+  filter: { query: '', order: 'asc' },
+};
+
+export const BookSearchStore = signalStore(
+  withState(initialState)
+);
+
+</code-example>
+
+For each state slice, a corresponding signal is automatically created.
+The same applies to nested state properties, with all deeply nested signals being generated lazily on demand.
+
+The `BookSearchStore` instance will contain the following properties:
+
+- `books: Signal<Book[]>`
+- `isLoading: Signal<boolean>`
+- `filter: DeepSignal<{ query: string; order: 'asc' | 'desc' }>`
+- `filter.query: Signal<string>`
+- `filter.order: Signal<'asc' | 'desc'>`
+
+<div class="alert is-helpful">
+
+The `withState` feature also has a signature that takes the initial state factory as an input argument.
+The factory is executed within the injection context, allowing initial state to be obtained from a service or injection token.
+
+```ts
+const BOOK_SEARCH_STATE = new InjectionToken<BookSearchState>(
+  'BookSearchState',
+  { factory: () => initialState }
+);
+
+const BookSearchStore = signalStore(
+  withState(() => inject(BOOK_SEARCH_STATE))
+);
+```
+
+</div>
+
+## Providing and Injecting the Store
+
+SignalStore can be provided locally and globally.
+By default, a SignalStore is not registered with any injectors and must be included in a providers array at the component, route, or root level before injection.
+
+<code-example header="book-search.ts">
+
+import { Component, inject } from '@angular/core';
+import { BookSearchStore } from './book-search-store';
+
+@Component({
+  /* ... */
+  // 👇 Providing `BookSearchStore` at the component level.
+  providers: [BookSearchStore],
+})
+export class BookSearch {
+  readonly store = inject(BookSearchStore);
+}
+
+</code-example>
+
+When provided at the component level, the store is tied to the component lifecycle, making it useful for managing local/component state.
+Alternatively, a SignalStore can be globally registered by setting the `providedIn` property to `root` when defining the store.
+
+<code-example header="book-search-store.ts">
+
+import { signalStore, withState } from '@ngrx/signals';
+import { Book } from './book';
+
+type BookSearchState = { /* ... */ };
+
+const initialState: BookSearchState = { /* ... */ };
+
+export const BookSearchStore = signalStore(
+  // 👇 Providing `BookSearchStore` at the root level.
+  { providedIn: 'root' },
+  withState(initialState)
+);
+
+</code-example>
+
+When provided globally, the store is registered with the root injector and becomes accessible anywhere in the application.
+This is beneficial for managing global state, as it ensures a single shared instance of the store across the entire application.
+
+## Reading State
+
+Signals generated for state slices can be utilized to access state values, as demonstrated below.
+
+<code-example header="book-search.ts">
+
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { BookSearchStore } from './book-search-store';
+
+@Component({
+  imports: [JsonPipe],
+  template: `
+    &lt;p&gt;Books: {{ store.books() | json }}&lt;/p&gt;
+    &lt;p&gt;Loading: {{ store.isLoading() }}&lt;/p&gt;
+
+    &lt;!-- 👇 The `DeepSignal` value can be read in the same way as `Signal`. --&gt;
+    &lt;p&gt;Pagination: {{ store.filter() | json }}&lt;/p&gt;
+
+    &lt;!-- 👇 Nested signals are created as `DeepSignal` properties. --&gt;
+    &lt;p&gt;Query: {{ store.filter.query() }}&lt;/p&gt;
+    &lt;p&gt;Order: {{ store.filter.order() }}&lt;/p&gt;
+  `,
+  providers: [BookSearchStore],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class BookSearch {
+  readonly store = inject(BookSearchStore);
+}
+
+</code-example>
+
+## Defining Store Properties
+
+Computed signals can be added to the store using the `withComputed` feature.
+This feature accepts a factory function as an input argument, which is executed within the injection context.
+The factory should return a dictionary containing either computed signals or functions that return values (which are automatically wrapped in computed signals), utilizing previously defined state signals, properties, and methods that are accessible through its input argument.
+
+<code-example header="book-search-store.ts">
+
+import { computed } from '@angular/core';
+import { signalStore, withComputed, withState } from '@ngrx/signals';
+import { Book } from './book';
+
+type BookSearchState = { /* ... */ };
+
+const initialState: BookSearchState = { /* ... */ };
+
+export const BookSearchStore = signalStore(
+  withState(initialState),
+  // 👇 Accessing previously defined state signals and properties.
+  withComputed(({ books, filter }) => ({
+    booksCount: computed(() => books().length),
+    // 👇 Adds computed automatically
+    sortedBooks: () => {
+      const direction = filter.order() === 'asc' ? 1 : -1;
+
+      return books().toSorted((a, b) =>
+        direction * a.title.localeCompare(b.title)
+      );
+    },
+  }))
+);
+
+</code-example>
+
+<div class="alert is-helpful">
+
+The `withProps` feature can be used to add static properties, observables, dependencies, and any other custom properties to a SignalStore.
+For more details, see the [Custom Store Properties](/guide/signals/signal-store/custom-store-properties) guide.
+
+</div>
+
+## Defining Store Methods
+
+Methods can be added to the store using the `withMethods` feature.
+This feature takes a factory function as an input argument and returns a dictionary of methods.
+Similar to `withComputed`, the `withMethods` factory is also executed within the injection context.
+The store instance, including previously defined state signals, properties, and methods, is accessible through the factory input.
+
+<code-example header="book-search-store.ts">
+
+import { computed } from '@angular/core';
+import {
+  patchState,
+  signalStore,
+  withComputed,
+  withMethods,
+  withState,
+} from '@ngrx/signals';
+import { Book } from './book';
+
+type BookSearchState = { /* ... */ };
+
+const initialState: BookSearchState = { /* ... */ };
+
+export const BookSearchStore = signalStore(
+  withState(initialState),
+  withComputed(/* ... */),
+  // 👇 Accessing a store instance with previously defined state signals,
+  // properties, and methods.
+  withMethods((store) => ({
+    updateQuery(query: string): void {
+      // 👇 Updating state using the `patchState` function.
+      patchState(store, (state) => ({ filter: { ...state.filter, query } }));
+    },
+    updateOrder(order: 'asc' | 'desc'): void {
+      patchState(store, (state) => ({ filter: { ...state.filter, order } }));
+    },
+  }))
+);
+
+</code-example>
+
+<div class="alert is-helpful">
+
+The state of the SignalStore is updated using the `patchState` function.
+For more details on the `patchState` function, refer to the [Updating State](/guide/signals/signal-state#updating-state) guide.
+
+</div>
+
+<div class="alert is-important">
+
+By default, SignalStore's state is protected from external modifications, ensuring a consistent and predictable data flow.
+This is the recommended approach.
+However, external updates to the state can be enabled by setting the `protectedState` option to `false` when creating a SignalStore.
+
+```ts
+export const BookSearchStore = signalStore(
+  { protectedState: false }, // 👈
+  withState(initialState)
+);
+
+@Component({ /* ... */ })
+export class BookSearch {
+  readonly store = inject(BookSearchStore);
+
+  addBook(book: Book): void {
+    // ⚠️ The state of the `BookSearchStore` is unprotected from external modifications.
+    patchState(this.store, ({ books }) => ({ books: [...books, book] }));
+  }
+}
+```
+
+</div>
+
+In addition to methods for updating state, the `withMethods` feature can also be used to create methods for performing side effects.
+Asynchronous side effects can be executed using Promise-based APIs, as demonstrated below.
+
+<code-example header="book-search-store.ts">
+
+import { computed, inject } from '@angular/core';
+import { patchState, signalStore, /* ... */ } from '@ngrx/signals';
+import { BooksService } from './books-service';
+import { Book } from './book';
+
+type BookSearchState = { /* ... */ };
+
+const initialState: BookSearchState = { /* ... */ };
+
+export const BookSearchStore = signalStore(
+  withState(initialState),
+  withComputed(/* ... */),
+  // 👇 `BooksService` can be injected within the `withMethods` factory.
+  withMethods((store, booksService = inject(BooksService)) => ({
+    /* ... */
+    // 👇 Defining a method to load all books.
+    async loadAll(): Promise&lt;void&gt; {
+      patchState(store, { isLoading: true });
+
+      const books = await booksService.getAll();
+      patchState(store, { books, isLoading: false });
+    },
+  }))
+);
+
+</code-example>
+
+### Reactive Store Methods
+
+In more complex scenarios, opting for RxJS to handle asynchronous side effects is advisable.
+To create a reactive SignalStore method that harnesses RxJS APIs, use the `rxMethod` function from the `rxjs-interop` plugin.
+
+<code-example header="book-search-store.ts">
+
+import { computed, inject } from '@angular/core';
+import { debounceTime, distinctUntilChanged, pipe, switchMap, tap } from 'rxjs';
+import { patchState, signalStore, /* ... */ } from '@ngrx/signals';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tapResponse } from '@ngrx/operators';
+import { BooksService } from './books-service';
+import { Book } from './book';
+
+type BookSearchState = { /* ... */ };
+
+const initialState: BookSearchState = { /* ... */ };
+
+export const BookSearchStore = signalStore(
+  withState(initialState),
+  withComputed(/* ... */),
+  withMethods((store, booksService = inject(BooksService)) => ({
+    /* ... */
+    // 👇 Defining a method to load books by query.
+    loadByQuery: rxMethod&lt;string&gt;(
+      pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        tap(() => patchState(store, { isLoading: true })),
+        switchMap((query) => {
+          return booksService.getByQuery(query).pipe(
+            tapResponse({
+              next: (books) => patchState(store, { books, isLoading: false }),
+              error: (err) => {
+                patchState(store, { isLoading: false });
+                console.error(err);
+              },
+            })
+          );
+        })
+      )
+    ),
+  }))
+);
+
+</code-example>
+
+<div class="alert is-helpful">
+
+To learn more about the `rxMethod` function, visit the [RxJS Integration](/guide/signals/rxjs-integration) page.
+
+</div>
+
+## Putting It All Together
+
+The final `BookSearchStore` implementation with state, computed signals, and methods from this guide is shown below.
+
+<code-example header="book-search-store.ts">
+
+import { computed, inject } from '@angular/core';
+import { debounceTime, distinctUntilChanged, pipe, switchMap, tap } from 'rxjs';
+import {
+  patchState,
+  signalStore,
+  withComputed,
+  withMethods,
+  withState,
+} from '@ngrx/signals';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tapResponse } from '@ngrx/operators';
+import { BooksService } from './books-service';
+import { Book } from './book';
+
+type BookSearchState = {
+  books: Book[];
+  isLoading: boolean;
+  filter: { query: string; order: 'asc' | 'desc' };
+};
+
+const initialState: BookSearchState = {
+  books: [],
+  isLoading: false,
+  filter: { query: '', order: 'asc' },
+};
+
+export const BookSearchStore = signalStore(
+  withState(initialState),
+  withComputed(({ books, filter }) => ({
+    booksCount: computed(() => books().length),
+    sortedBooks: computed(() => {
+      const direction = filter.order() === 'asc' ? 1 : -1;
+
+      return books().toSorted((a, b) =>
+        direction * a.title.localeCompare(b.title)
+      );
+    }), 
+  })),
+  withMethods((store, booksService = inject(BooksService)) => ({
+    updateQuery(query: string): void {
+      patchState(store, (state) => ({ filter: { ...state.filter, query } }));
+    },
+    updateOrder(order: 'asc' | 'desc'): void {
+      patchState(store, (state) => ({ filter: { ...state.filter, order } }));
+    },
+    loadByQuery: rxMethod&lt;string&gt;(
+      pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        tap(() => patchState(store, { isLoading: true })),
+        switchMap((query) => {
+          return booksService.getByQuery(query).pipe(
+            tapResponse({
+              next: (books) => patchState(store, { books }),
+              error: console.error,
+              finalize: () => patchState(store, { isLoading: false }),
+            })
+          );
+        })
+      )
+    ),
+  }))
+);
+
+</code-example>
+
+The `BookSearchStore` instance will contain the following properties and methods:
+
+- State signals:
+  - `books: Signal<Book[]>`
+  - `isLoading: Signal<boolean>`
+  - `filter: DeepSignal<{ query: string; order: 'asc' | 'desc' }>`
+  - `filter.query: Signal<string>`
+  - `filter.order: Signal<'asc' | 'desc'>`
+- Computed signals:
+  - `booksCount: Signal<number>`
+  - `sortedBooks: Signal<Book[]>`
+- Methods:
+  - `updateQuery(query: string): void`
+  - `updateOrder(order: 'asc' | 'desc'): void`
+  - `loadByQuery: RxMethod<string>`
+
+<div class="alert is-helpful">
+
+The `BookSearchStore` implementation can be enhanced further by utilizing the `entities` plugin and creating custom SignalStore features.
+For more details, refer to the [Entity Management](guide/signals/signal-store/entity-management) and [Custom Store Features](guide/signals/signal-store/custom-store-features) guides.
+
+</div>
+
+The `BookSearch` component can use the `BookSearchStore` to manage the state, as demonstrated below.
+
+<code-example header="book-search.ts">
+
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { BookFilter } from './book-filter';
+import { BookList } from './book-list';
+import { BooksStore } from './books.store';
+
+@Component({
+  imports: [BookFilter, BookList],
+  template: `
+    &lt;h1&gt;Books ({{ store.booksCount() }})&lt;/h1&gt;
+
+    &lt;ngrx-book-filter
+      [query]="store.filter.query()"
+      [order]="store.filter.order()"
+      (queryChange)="store.updateQuery($event)"
+      (orderChange)="store.updateOrder($event)"
+    /&gt;
+
+    &lt;ngrx-book-list
+      [books]="store.sortedBooks()"
+      [isLoading]="store.isLoading()"
+    /&gt;
+  `,
+  providers: [BookSearchStore],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class BookSearch {
+  readonly store = inject(BookSearchStore);
+
+  constructor() {
+    const query = this.store.filter.query;
+    // 👇 Re-fetch books whenever the value of query signal changes.
+    this.store.loadByQuery(query);
+  }
+}
+
+</code-example>
+
+<div class="alert is-helpful">
+
+In addition to component lifecycle hooks, SignalStore also offers the ability to define them at the store level.
+Learn more about SignalStore lifecycle hooks [here](/guide/signals/signal-store/lifecycle-hooks).
+
+</div>
+# Lifecycle Hooks
+
+The `@ngrx/signals` package provides the `withHooks` feature for incorporating lifecycle hooks into a SignalStore.
+This feature enables performing additional logic when the store is initialized or destroyed.
+
+The `withHooks` feature has two signatures.
+The first signature expects an object with `onInit` and/or `onDestroy` methods.
+Both methods receive the store instance as input arguments.
+
+<code-example header="counter-store.ts">
+
+import { computed } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval } from 'rxjs';
+import { patchState, signalStore, withState, withHooks, withMethods } from '@ngrx/signals';
+
+export const CounterStore = signalStore(
+  withState({ count: 0 }),
+  withMethods((store) => ({
+    increment(): void {
+      patchState(store, (state) => ({ count: state.count + 1 }));
+    },
+  })),
+  withHooks({
+    onInit(store) {
+      // 👇 Increment the `count` every 2 seconds.
+      interval(2_000)
+        // 👇 Automatically unsubscribe when the store is destroyed.
+        .pipe(takeUntilDestroyed())
+        .subscribe(() => store.increment());
+    },
+    onDestroy(store) {
+      console.log('count on destroy', store.count());
+    },
+  }),
+);
+
+</code-example>
+
+The `onInit` hook is executed within the injection context, enabling the injection of dependencies or the utilization of functions that must be invoked within the injection context, such as `takeUntilDestroyed`.
+
+
+If there is a need to share code between lifecycle hooks or use injected dependencies within the `onDestroy` hook, the second signature can be utilized.
+Similar to the `withMethods` and `withComputed` features, the second signature of the `withHooks` feature expects a factory function.
+This function receives a store instance as an input argument, returns an object with `onInit` and/or `onDestroy` methods, and is executed within the injection context.
+
+<code-example header="counter-store.ts">
+
+export const CounterStore = signalStore(
+  /* ... */
+  withHooks((store) => {
+    const logger = inject(Logger);
+    let interval = 0;
+
+    return {
+      onInit() {
+        interval = setInterval(() => store.increment(), 2_000);
+      },
+      onDestroy() {
+        logger.info('count on destroy', store.count());
+        clearInterval(interval);
+      },
+    };
+  }),
+);
+
+</code-example>
+# Custom Store Properties
+
+The `withProps` feature can be used to add static properties, observables, dependencies, or other custom properties to a SignalStore.
+It accepts a factory function that returns an object containing additional properties for the store.
+The factory function receives an object containing state signals, previously defined properties, and methods as its input argument.
+
+## Exposing Observables
+
+`withProps` can be useful for exposing observables from a SignalStore, which can serve as integration points with RxJS-based APIs:
+
+<code-example header="books-store.ts">
+
+import { toObservable } from '@angular/core/rxjs-interop';
+import { signalStore, withProps, withState } from '@ngrx/signals';
+import { Book } from './book';
+
+type BooksState = {
+  books: Book[];
+  isLoading: boolean;
+};
+
+export const BooksStore = signalStore(
+  withState&lt;BooksState&gt;({ books: [], isLoading: false }),
+  withProps(({ isLoading }) => ({
+    isLoading$: toObservable(isLoading),
+  })),
+);
+
+</code-example>
+
+## Grouping Dependencies
+
+Dependencies required across multiple store features can be grouped using `withProps`:
+
+<code-example header="books-store.ts">
+
+import { inject } from '@angular/core';
+import { signalStore, withProps, withState } from '@ngrx/signals';
+import { Logger } from './logger';
+import { BooksService } from './books-service';
+import { Book } from './book';
+
+type BooksState = {
+  books: Book[];
+  isLoading: boolean;
+};
+
+export const BooksStore = signalStore(
+  withState&lt;BooksState&gt;({ books: [], isLoading: false }),
+  withProps(() => ({
+    booksService: inject(BooksService),
+    logger: inject(Logger),
+  })),
+  withMethods(({ booksService, logger, ...store }) => ({
+    async loadBooks(): Promise&lt;void&gt; {
+      logger.debug('Loading books...');
+      patchState(store, { isLoading: true });
+      
+      const books = await booksService.getAll();
+      logger.debug('Books loaded successfully', books);
+      
+      patchState(store, { books, isLoading: false });
+    },
+  })),
+  withHooks({
+    onInit({ logger }) {
+      logger.debug('BooksStore initialized');
+    },
+  }),
+);
+
+</code-example>
+
+# Linked State
+
+The `withLinkedState` feature enables the creation of state slices that depend on other signals.
+This feature accepts a factory function as an input argument, which is executed within the injection context.
+The factory should return a dictionary containing linked state slices, defined as either computation functions or `WritableSignal` instances.
+These linked state slices become an integral part of the SignalStore's state and are treated the same as regular state slices - `DeepSignal`s are created for each of them, and they can be updated using `patchState`.
+
+## Implicit Linking
+
+When a computation function is provided, the SignalStore wraps it in a `linkedSignal()`.
+As a result, the linked state slice is updated automatically whenever any of its dependent signals change.
+
+<code-tabs linenums="true">
+<code-pane header="options-store.ts">
+
+import {
+  patchState,
+  signalStore,
+  withLinkedState,
+  withMethods,
+  withState,
+} from '@ngrx/signals';
+
+export const OptionsStore = signalStore(
+  withState({ options: [1, 2, 3] }),
+  withLinkedState(({ options }) => ({
+    // 👇 Defining a linked state slice.
+    selectedOption: () => options()[0] ?? undefined,
+  })),
+  withMethods((store) => ({
+    setOptions(options: number[]): void {
+      patchState(store, { options });
+    },
+    setSelectedOption(selectedOption: number): void {
+      // 👇 Updating a linked state slice.
+      patchState(store, { selectedOption });
+    },
+  })),
+);
+
+</code-pane>
+
+<code-pane header="option-list.ts">
+
+@Component({
+  // ... other metadata
+  providers: [OptionsStore],
+})
+export class OptionList {
+  readonly store = inject(OptionsStore);
+
+  constructor() {
+    console.log(this.store.selectedOption()); // logs: 1
+
+    this.store.setSelectedOption(2);
+    console.log(this.store.selectedOption()); // logs: 2
+
+    this.store.setOptions([4, 5, 6]);
+    console.log(this.store.selectedOption()); // logs: 4
+  }
+}
+
+</code-pane>
+</code-tabs>
+
+## Explicit Linking
+
+The `withLinkedState` feature also supports providing `WritableSignal` instances as linked state slices.
+This can include signals created using `linkedSignal()` with `source` and `computation` options, as well as any other `WritableSignal` instances.
+In both cases, the SignalStore and the original signal remain fully synchronized - updating one immediately reflects in the other.
+
+<code-example header="options-store.ts">
+
+import { linkedSignal } from '@angular/core';
+import { signalStore, withLinkedState, withState } from '@ngrx/signals';
+
+export const OptionsStore = signalStore(
+  withState({ options: [] as Option[] }),
+  withLinkedState(({ options }) => ({
+    selectedOption: linkedSignal&lt;Option[], Option&gt;({
+      source: options,
+      computation: (newOptions, previous) => {
+        const option = newOptions.find((o) => o.id === previous?.value.id);
+        return option ?? newOptions[0];
+      },
+    }),
+  }))
+);
+
+</code-example>
+# State Tracking
+
+State tracking enables the implementation of custom SignalStore features such as logging, state undo/redo, and storage synchronization.
+
+## Using `getState` and `effect`
+
+The `getState` function is used to get the current state value of the SignalStore.
+When used within a reactive context, state changes are automatically tracked.
+
+<code-example header="counter-store.ts">
+
+import { effect } from '@angular/core';
+import {
+  getState,
+  patchState,
+  signalStore,
+  withHooks,
+  withMethods,
+  withState,
+} from '@ngrx/signals';
+
+export const CounterStore = signalStore(
+  withState({ count: 0 }),
+  withMethods((store) => ({
+    increment(): void {
+      patchState(store, { count: store.count() + 1 });
+    },
+  })),
+  withHooks({
+    onInit(store) {
+      effect(() => {
+        // 👇 The effect is re-executed on state change.
+        const state = getState(store);
+        console.log('counter state', state);
+      });
+
+      setInterval(() => store.increment(), 1_000);
+    },
+  })
+);
+
+</code-example>
+
+Due to the `effect` glitch-free behavior, if the state is changed multiple times in the same tick, the effect function will be executed only once with the final state value.
+While the asynchronous effect execution is beneficial for performance reasons, functionalities such as state undo/redo require tracking all SignalStore's state changes without coalescing state updates in the same tick.
+
+## Using `watchState`
+
+The `watchState` function allows for synchronous tracking of SignalStore's state changes.
+It accepts a SignalStore instance as the first argument and a watcher function as the second argument.
+
+By default, the `watchState` function needs to be executed within an injection context.
+It is tied to its lifecycle and is automatically cleaned up when the injector is destroyed.
+
+<code-example header="counter-store.ts">
+
+import { effect } from '@angular/core';
+import {
+  getState,
+  patchState,
+  signalStore,
+  watchState,
+  withHooks,
+  withState,
+} from '@ngrx/signals';
+
+export const CounterStore = signalStore(
+  withState({ count: 0 }),
+  withMethods((store) => ({
+    increment(): void {
+      patchState(store, { count: store.count() + 1 });
+    },
+  })),
+  withHooks({
+    onInit(store) {
+      watchState(store, (state) => {
+        console.log('[watchState] counter state', state);
+      }); // logs: { count: 0 }, { count: 1 }, { count: 2 }
+      
+      effect(() => {
+        console.log('[effect] counter state', getState(store));
+      }); // logs: { count: 2 }
+
+      store.increment();
+      store.increment();
+    },
+  })
+);
+
+</code-example>
+
+In the example above, the `watchState` function will execute the provided watcher 3 times: once with the initial counter state value and two times after each increment.
+Conversely, the `effect` function will be executed only once with the final counter state value.
+
+### Manual Cleanup
+
+If a state watcher needs to be cleaned up before the injector is destroyed, manual cleanup can be performed by calling the `destroy` method.
+
+<code-example header="counter-store.ts">
+
+import {
+  patchState,
+  signalStore,
+  watchState,
+  withHooks,
+  witMethods,
+  withState,
+} from '@ngrx/signals';
+
+export const CounterStore = signalStore(
+  withState({ count: 0 }),
+  withMethods((store) => ({
+    increment(): void {
+      patchState(store, { count: store.count() + 1 });
+    },
+  })),
+  withHooks({
+    onInit(store) {
+      const { destroy } = watchState(store, console.log);
+
+      setInterval(() => store.increment(), 1_000);
+
+      // 👇 Stop watching after 5 seconds.
+      setTimeout(() => destroy(), 5_000);
+    },
+  })
+);
+
+</code-example>
+
+### Usage Outside of Injection Context
+
+The `watchState` function can be used outside an injection context by providing an injector as the second argument.
+
+<code-example header="counter.ts">
+
+import { Component, inject, Injector, OnInit } from '@angular/core';
+import { watchState } from '@ngrx/signals';
+import { CounterStore } from './counter-store';
+
+@Component({
+  /* ... */
+  providers: [CounterStore],
+})
+export class Counter implements OnInit {
+  readonly #injector = inject(Injector);
+  readonly store = inject(CounterStore);
+
+  ngOnInit(): void {
+    watchState(this.store, console.log, {
+      injector: this.#injector,
+    });
+
+    setInterval(() => this.store.increment(), 2_000);
+  }
+}
+
+</code-example>
+# Private Store Members
+
+SignalStore allows defining private members that cannot be accessed from outside the store by using the `_` prefix.
+This includes root-level state slices, properties, and methods.
+
+<code-tabs linenums="false">
+<code-pane header="counter-store.ts">
+
+import { computed } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import {
+  patchState,
+  signalStore,
+  withComputed,
+  withMethods,
+  withProps,
+  withState,
+} from '@ngrx/signals';
+
+export const CounterStore = signalStore(
+  withState({
+    count1: 0,
+    // 👇 private state slice
+    _count2: 0,
+  }),
+  withComputed(({ count1, _count2 }) => ({
+    // 👇 private computed signal
+    _doubleCount1: computed(() => count1() * 2),
+    doubleCount2: computed(() => _count2() * 2),
+  })),
+  withProps(({ count2, _doubleCount1 }) => ({
+    // 👇 private property
+    _count2$: toObservable(count2),
+    doubleCount1$: toObservable(_doubleCount1),
+  })),
+  withMethods((store) => ({
+    increment1(): void {
+      patchState(store, { count1: store.count1() + 1 });
+    },
+    // 👇 private method
+    _increment2(): void {
+      patchState(store, { _count2: store._count2() + 1 });
+    },
+  })),
+);
+
+</code-pane>
+
+<code-pane header="counter.ts">
+
+import { Component, inject, OnInit } from '@angular/core';
+import { CounterStore } from './counter-store';
+
+@Component({
+  /* ... */
+  providers: [CounterStore],
+})
+export class Counter implements OnInit {
+  readonly store = inject(CounterStore);
+
+  ngOnInit(): void {
+    console.log(this.store.count1()); // ✅
+    console.log(this.store._count2()); // ❌
+
+    console.log(this.store._doubleCount1()); // ❌
+    console.log(this.store.doubleCount2()); // ✅
+
+    this.store._count2$.subscribe(console.log); // ❌
+    this.store.doubleCount1$.subscribe(console.log); // ✅
+
+    this.store.increment1(); // ✅
+    this.store._increment2(); // ❌
+  }
+}
+
+</code-pane>
+</code-tabs>
+# Custom Store Features
+
+Custom SignalStore features provide a robust mechanism for extending core functionality and encapsulating common patterns, facilitating reuse across multiple stores.
+
+## Creating a Custom Feature
+
+A custom feature is created using the `signalStoreFeature` function, which accepts a sequence of base or other custom features as input arguments and merges them into a single feature.
+
+### Example 1: Tracking Request Status
+
+The following example demonstrates how to create a custom feature that includes the `requestStatus` state slice along with computed signals for checking the request status.
+
+<code-example header="with-request-status.ts">
+
+import { computed } from '@angular/core';
+import { signalStoreFeature, withComputed, withState } from '@ngrx/signals';
+
+export type RequestStatus = 'idle' | 'pending' | 'fulfilled' | { error: string };
+export type RequestStatusState = { requestStatus: RequestStatus };
+
+export function withRequestStatus() {
+  return signalStoreFeature(
+    withState&lt;RequestStatusState&gt;({ requestStatus: 'idle' }),
+    withComputed(({ requestStatus }) => ({
+      isPending: computed(() => requestStatus() === 'pending'),
+      isFulfilled: computed(() => requestStatus() === 'fulfilled'),
+      error: computed(() => {
+        const status = requestStatus();
+        return typeof status === 'object' ? status.error : null;
+      }),
+    }))
+  );
+}
+
+</code-example>
+
+In addition to the state slice and computed signals, this feature also specifies a set of state updaters for modifying the request status.
+
+<code-example header="with-request-status.ts">
+
+export function setPending(): RequestStatusState {
+  return { requestStatus: 'pending' };
+}
+
+export function setFulfilled(): RequestStatusState {
+  return { requestStatus: 'fulfilled' };
+}
+
+export function setError(error: string): RequestStatusState {
+  return { requestStatus: { error } };
+}
+
+</code-example>
+
+<div class="alert is-important">
+
+For a custom feature, it is recommended to define state updaters as standalone functions rather than feature methods. This approach enables tree-shaking, simplifies testing, and facilitates their use alongside other updaters in a single `patchState` call.
+
+</div>
+
+The `withRequestStatus` feature and updaters can be used to add the `requestStatus` state slice, along with the `isPending`, `isFulfilled`, and `error` computed signals to the `BooksStore`, as follows:
+
+<code-example header="books-store.ts">
+
+import { inject } from '@angular/core';
+import { patchState, signalStore, withMethods } from '@ngrx/signals';
+import { setAllEntities, withEntities } from '@ngrx/signals/entities';
+import { setFulfilled, setPending, withRequestStatus } from './with-request-status';
+import { BooksService } from './books-service';
+import { Book } from './book';
+
+export const BooksStore = signalStore(
+  withEntities&lt;Book&gt;(),
+  withRequestStatus(),
+  withMethods((store, booksService = inject(BooksService)) => ({
+    async loadAll() {
+      patchState(store, setPending());
+
+      const books = await booksService.getAll();
+      patchState(store, setAllEntities(books), setFulfilled());
+    },
+  })),
+);
+
+</code-example>
+
+The `BooksStore` instance will contain the following properties and methods:
+
+- State signals from `withEntities` feature:
+  - `entityMap: Signal<EntityMap<Book>>`
+  - `ids: Signal<EntityId[]>`
+- Computed signals from `withEntities` feature:
+  - `entities: Signal<Book[]>`
+- State signals from `withRequestStatus` feature:
+  - `requestStatus: Signal<RequestStatus>`
+- Computed signals from `withRequestStatus` feature:
+  - `isPending: Signal<boolean>`
+  - `isFulfilled: Signal<boolean>`
+  - `error: Signal<string | null>`
+- Methods:
+  - `loadAll(): Promise<void>`
+
+<div class="alert is-helpful">
+
+In this example, the `withEntities` feature from the `entities` plugin is utilized.
+For more details, refer to the [Entity Management guide](guide/signals/signal-store/entity-management).
+
+</div>
+
+### Example 2: Logging State Changes
+
+The following example shows how to create a custom feature that logs SignalStore state changes to the console.
+
+<code-example header="with-logger.ts">
+
+import { effect } from '@angular/core';
+import { getState, signalStoreFeature, withHooks } from '@ngrx/signals';
+
+export function withLogger(name: string) {
+  return signalStoreFeature(
+    withHooks({
+      onInit(store) {
+        effect(() => {
+          const state = getState(store);
+          console.log(`${name} state changed`, state);
+        });
+      },
+    })
+  );
+}
+
+</code-example>
+
+The `withLogger` feature can be used in the `BooksStore` as follows:
+
+<code-example header="books-store.ts">
+
+import { signalStore } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
+import { withRequestStatus } from './with-request-status';
+import { withLogger } from './with-logger';
+import { Book } from './book';
+
+export const BooksStore = signalStore(
+  withEntities&lt;Book&gt;(),
+  withRequestStatus(),
+  withLogger('books')
+);
+
+</code-example>
+
+State changes will be logged to the console whenever the `BooksStore` state is updated.
+
+## Creating a Custom Feature with Input
+
+The `signalStoreFeature` function provides the ability to create a custom feature that requires specific state slices, properties, and/or methods to be defined in the store where it is used.
+This enables the utilization of input properties within the custom feature, even if they are not explicitly defined within the feature itself.
+
+The expected input type should be defined as the first argument of the `signalStoreFeature` function, using the `type` helper function from the `@ngrx/signals` package.
+
+<div class="alert is-important">
+
+It's recommended to define loosely-coupled/independent features whenever possible.
+
+</div>
+
+### Example 3: Managing Selected Entity
+
+The following example demonstrates how to create the `withSelectedEntity` feature.
+
+<code-example header="with-selected-entity.ts">
+
+import { computed } from '@angular/core';
+import { signalStoreFeature, type, withComputed, withState } from '@ngrx/signals';
+import { EntityId, EntityState } from '@ngrx/signals/entities';
+
+export type SelectedEntityState = { selectedEntityId: EntityId | null };
+
+export function withSelectedEntity&lt;Entity&gt;() {
+  return signalStoreFeature(
+    { state: type&lt;EntityState&lt;Entity&gt;&gt;() },
+    withState&lt;SelectedEntityState&gt;({ selectedEntityId: null }),
+    withComputed(({ entityMap, selectedEntityId }) => ({
+      selectedEntity: computed(() => {
+        const selectedId = selectedEntityId();
+        return selectedId ? entityMap()[selectedId] : null;
+      }),
+    }))
+  );
+}
+
+</code-example>
+
+The `withSelectedEntity` feature adds the `selectedEntityId` state slice and the `selectedEntity` computed signal to the store where it is used.
+However, it expects state properties from the `EntityState` type to be defined in that store.
+These properties can be added to the store by using the `withEntities` feature from the `entities` plugin.
+
+<code-example header="books-store.ts">
+
+import { signalStore } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
+import { withSelectedEntity } from './with-selected-entity';
+import { Book } from './book';
+
+export const BooksStore = signalStore(
+  withEntities&lt;Book&gt;(),
+  withSelectedEntity()
+);
+
+</code-example>
+
+The `BooksStore` instance will contain the following properties:
+
+- State signals from `withEntities` feature:
+  - `entityMap: Signal<EntityMap<Book>>`
+  - `ids: Signal<EntityId[]>`
+- Computed signals from `withEntities` feature:
+  - `entities: Signal<Book[]>`
+- State signals from `withSelectedEntity` feature:
+  - `selectedEntityId: Signal<EntityId | null>`
+- Computed signals from `withSelectedEntity` feature:
+  - `selectedEntity: Signal<Book | null>`
+
+The `@ngrx/signals` package offers high-level type safety.
+Therefore, if `BooksStore` does not contain state properties from the `EntityState` type, the compilation error will occur.
+
+<code-example header="books-store.ts">
+
+import { signalStore } from '@ngrx/signals';
+import { withSelectedEntity } from './with-selected-entity';
+import { Book } from './book';
+
+export const BooksStore = signalStore(
+  withState({ books: [] as Book[], isLoading: false }),
+  // Error: `EntityState` properties (`entityMap` and `ids`) are missing in the `BooksStore`.
+  withSelectedEntity()
+);
+
+</code-example>
+
+### Example 4: Defining Properties and Methods as Input
+
+In addition to state, it's also possible to define expected properties and methods in the following way:
+
+<code-example header="with-baz.ts">
+
+import { Signal } from '@angular/core';
+import { signalStoreFeature, type, withMethods } from '@ngrx/signals';
+
+export function withBaz&lt;Foo extends string | number&gt;() {
+  return signalStoreFeature(
+    {
+      props: type&lt;{ foo: Signal&lt;Foo&gt; }&gt;(),
+      methods: type&lt;{ bar(foo: number): void }&gt;(),
+    },
+    withMethods((store) => ({
+      baz(): void {
+        const foo = store.foo();
+        store.bar(typeof foo === 'number' ? foo : Number(foo));
+      },
+    }))
+  );
+}
+
+</code-example>
+
+The `withBaz` feature can only be used in a store where the property `foo` and the method `bar` are defined. 
+
+## Using `withFeature`
+
+An alternative approach to custom features with input is using the `withFeature` utility, which offers more flexibility.
+
+The `withFeature` function accepts a callback that receives a store instance and returns a SignalStore feature.
+This enables using features that rely on external inputs without depending on the store’s internal structure.
+
+```ts
+import { computed, Signal } from '@angular/core';
+import {
+  patchState,
+  signalStore,
+  signalStoreFeature,
+  withComputed,
+  withFeature,
+  withMethods,
+  withState,
+} from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
+import { Book } from './book';
+
+export function withBooksFilter(books: Signal<Book[]>) {
+  return signalStoreFeature(
+    withState({ query: '' }),
+    withComputed(({ query }) => ({
+      filteredBooks: computed(() =>
+        books().filter((b) => b.name.includes(query()))
+      ),
+    })),
+    withMethods((store) => ({
+      setQuery(query: string): void {
+        patchState(store, { query });
+      },
+    })),
+)};
+
+export const BooksStore = signalStore(
+  withEntities<Book>(),
+  // 👇 Using `withFeature` to pass input to the `withBooksFilter` feature.
+  withFeature(({ entities }) => withBooksFilter(entities)),
+);
+```
+
+## Known TypeScript Issues
+
+Combining multiple custom features with static input may cause unexpected compilation errors:
+
+```ts
+function withZ() {
+  return signalStoreFeature(
+    { state: type<{ x: number }>() },
+    withState({ z: 10 })
+  );
+}
+
+function withW() {
+  return signalStoreFeature(
+    { state: type<{ y: number }>() },
+    withState({ w: 100 })
+  );
+}
+
+const Store = signalStore(
+  withState({ x: 10, y: 100 }),
+  withZ(),
+  withW()
+); // ❌ compilation error
+```
+
+This issue arises specifically with custom features that accept input but do not define any generic parameters.
+To prevent this issue, it is recommended to specify an unused generic for such custom features:
+
+```ts
+//            👇
+function withZ<_>() {
+  return signalStoreFeature(
+    { state: type<{ x: number }>() },
+    withState({ z: 10 })
+  );
+}
+
+//            👇
+function withW<_>() {
+  return signalStoreFeature(
+    { state: type<{ y: number }>() },
+    withState({ w: 100 })
+  );
+}
+
+const Store = signalStore(
+  withState({ x: 10, y: 100 }),
+  withZ(),
+  withW()
+); // ✅ works as expected
+```
+# Entity Management
+
+The `@ngrx/signals/entities` plugin offers a simple and efficient way to manage entity collections with NgRx SignalStore.
+This plugin provides the `withEntities` feature and a set of entity updaters.
+
+## `withEntities` Feature
+
+The `withEntities` feature integrates entity state into the store.
+By default, `withEntities` requires an entity to have an `id` property, which serves as a unique identifier and must be of type `EntityId` (either a `string` or a `number`).
+
+<code-example header="todos-store.ts">
+
+import { computed } from '@angular/core';
+import { signalStore } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
+
+type Todo = {
+  id: number;
+  text: string;
+  completed: boolean;
+};
+
+export const TodosStore = signalStore(
+  withEntities&lt;Todo&gt;()
+);
+
+</code-example>
+
+The `withEntities` feature adds the following signals to the `TodosStore`:
+
+- `ids: Signal<EntityId[]>`: An array of all entity IDs.
+- `entityMap: Signal<EntityMap<Todo>>`: A map of entities where each key is an ID.
+- `entities: Signal<Todo[]>`: An array of all entities.
+
+The `ids` and `entityMap` are state slices, while `entities` is a computed signal.
+
+## Entity Updaters
+
+The `entities` plugin provides a set of standalone entity updaters.
+These functions can be used with `patchState` to facilitate entity collection updates.
+
+<code-example header="todos-store.ts">
+
+import { patchState, signalStore, withMethods } from '@ngrx/signals';
+import {
+  addEntity,
+  removeEntities,
+  updateAllEntities,
+  withEntities,
+} from '@ngrx/signals/entities';
+
+type Todo = { /* ... */ };
+
+export const TodosStore = signalStore(
+  withEntities&lt;Todo&gt;(),
+  withMethods((store) => ({
+    addTodo(todo: Todo): void {
+      patchState(store, addEntity(todo));
+    },
+    removeEmptyTodos(): void {
+      patchState(store, removeEntities(({ text }) => !text));
+    },
+    completeAllTodos(): void {
+      patchState(store, updateAllEntities({ completed: true }));
+    },
+  }))
+);
+
+</code-example>
+
+### `addEntity`
+
+Adds an entity to the collection.
+If the entity collection has an entity with the same ID, it is not overridden and no error is thrown.
+
+```ts
+patchState(store, addEntity(todo));
+```
+
+### `addEntities`
+
+Adds multiple entities to the collection.
+If the entity collection has entities with the same IDs, they are not overridden and no error is thrown.
+
+```ts
+patchState(store, addEntities([todo1, todo2]));
+```
+
+### `prependEntity`
+
+Adds an entity to the beginning of the collection.
+If the entity collection has an entity with the same ID, it is not added and no error is thrown.
+
+```ts
+patchState(store, prependEntity(todo));
+```
+
+### `prependEntities`
+
+Adds multiple entities to the beginning of the collection, maintaining their relative order.
+If the entity collection has entities with the same IDs, they are not added and no error is thrown.
+
+```ts
+patchState(store, prependEntities([todo1, todo2]));
+```
+
+### `updateEntity`
+
+Updates an entity in the collection by ID. Supports partial updates. No error is thrown if an entity doesn't exist.
+
+```ts
+patchState(
+  store,
+  updateEntity({ id: 1, changes: { completed: true } })
+);
+
+patchState(
+  store,
+  updateEntity({
+    id: 1,
+    changes: (todo) => ({ completed: !todo.completed }),
+  })
+);
+```
+
+### `updateEntities`
+
+Updates multiple entities in the collection by IDs or predicate. Supports partial updates. No error is thrown if entities don't exist.
+
+```ts
+// update entities by IDs
+patchState(
+  store,
+  updateEntities({ ids: [1, 2], changes: { completed: true } })
+);
+
+patchState(
+  store,
+  updateEntities({
+    ids: [1, 2],
+    changes: (todo) => ({ completed: !todo.completed }),
+  })
+);
+
+// update entities by predicate
+patchState(
+  store,
+  updateEntities({
+    predicate: ({ text }) => text.endsWith('✅'),
+    changes: { text: '' },
+  })
+);
+
+patchState(
+  store,
+  updateEntities({
+    predicate: ({ text }) => text.endsWith('❓'),
+    changes: (todo) => ({ text: todo.text.slice(0, -1) }),
+  })
+);
+```
+
+### `updateAllEntities`
+
+Updates all entities in the collection. Supports partial updates. No error is thrown if entities don't exist.
+
+```ts
+patchState(store, updateAllEntities({ text: '' }));
+
+patchState(
+  store,
+  updateAllEntities((todo) => ({ text: `${todo.text} ${todo.id}` }))
+);
+```
+
+### `setEntity`
+
+Adds or replaces an entity in the collection.
+
+```ts
+patchState(store, setEntity(todo));
+```
+
+### `setEntities`
+
+Adds or replaces multiple entities in the collection.
+
+```ts
+patchState(store, setEntities([todo1, todo2]));
+```
+
+### `setAllEntities`
+
+Replaces the current entity collection with the provided collection.
+
+```ts
+patchState(store, setAllEntities([todo1, todo2, todo3]));
+```
+
+### `upsertEntity`
+
+Adds or updates an entity in the collection.
+When updating, it does not replace the existing entity but merges it with the provided one.
+Only the properties provided in the updated entity are merged with the existing entity.
+Properties not present in the updated entity remain unchanged.
+
+```ts
+patchState(store, upsertEntity(todo));
+```
+
+### `upsertEntities`
+
+Adds or updates multiple entities in the collection.
+When updating, it does not replace existing entities but merges them with the provided ones.
+Only the properties provided in updated entities are merged with existing entities.
+Properties not present in updated entities remain unchanged.
+
+```ts
+patchState(store, upsertEntities([todo1, todo2]));
+```
+
+### `removeEntity`
+
+Removes an entity from the collection by ID. No error is thrown if an entity doesn't exist.
+
+```ts
+patchState(store, removeEntity(1));
+```
+
+### `removeEntities`
+
+Removes multiple entities from the collection by IDs or predicate. No error is thrown if entities don't exist.
+
+```ts
+// remove entities by IDs
+patchState(store, removeEntities([1, 2]));
+
+// remove entities by predicate
+patchState(store, removeEntities((todo) => todo.completed));
+```
+
+### `removeAllEntities`
+
+Removes all entities from the collection. No error is thrown if entities don't exist.
+
+```ts
+patchState(store, removeAllEntities());
+```
+
+## Custom Entity Identifier
+
+If an entity doesn't have an identifier named `id`, a custom ID selector should be used.
+The selector's return type should be either `string` or `number`.
+
+Custom ID selectors should be provided when adding, setting, or updating entities.
+Therefore, all variations of the `add*`, `set*`, and `update*` functions include an optional second argument, which is a config object that allows specifying the `selectId` function.
+
+<code-example header="todos-store.ts">
+
+import { patchState, signalStore, withMethods } from '@ngrx/signals';
+import {
+  addEntities,
+  removeEntity,
+  SelectEntityId,
+  setEntity,
+  updateAllEntities,
+  withEntities,
+} from '@ngrx/signals/entities';
+
+type Todo = {
+  key: number;
+  text: string;
+  completed: boolean;
+};
+
+const selectId: SelectEntityId&lt;Todo&gt = (todo) => todo.key;
+
+export const TodosStore = signalStore(
+  withEntities&lt;Todo&gt;(),
+  withMethods((store) => ({
+    addTodos(todos: Todo[]): void {
+      patchState(store, addEntities(todos, { selectId }));
+    },
+    setTodo(todo: Todo): void {
+      patchState(store, setEntity(todo, { selectId }));
+    },
+    completeAllTodos(): void {
+      patchState(
+        store,
+        updateAllEntities({ completed: true }, { selectId })
+      );
+    },
+    removeTodo(key: number): void {
+      patchState(store, removeEntity(key));
+    },
+  }))
+);
+
+</code-example>
+
+The `remove*` updaters automatically select the correct identifier, so it is not necessary to provide a custom ID selector.
+
+## Named Entity Collections
+
+The `withEntities` feature allows specifying a custom prefix for entity properties by providing a collection name as an input argument.
+
+<code-example header="todos-store.ts">
+
+import { signalStore, type } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
+
+type Todo = {
+  id: number;
+  text: string;
+  completed: boolean;
+};
+
+export const TodosStore = signalStore(
+  // 💡 Entity type is specified using the `type` function.
+  withEntities({ entity: type&lt;Todo&gt;(), collection: 'todo' }),
+);
+
+</code-example>
+
+The names of the `TodosStore` properties are changed from `ids`, `entityMap`, and `entities` to `todoIds`, `todoEntityMap`, and `todoEntities`.
+
+All updaters that operate on named entity collections require a collection name.
+
+<code-example header="todos-store.ts">
+
+import {
+  patchState,
+  signalStore,
+  type,
+  withMethods,
+} from '@ngrx/signals';
+import { addEntity, removeEntity, withEntities } from '@ngrx/signals/entities';
+
+type Todo = { /* ... */ };
+
+export const TodosStore = signalStore(
+  withEntities({ entity: type&lt;Todo&gt;(), collection: 'todo' }),
+  withMethods((store) => ({
+    addTodo(todo: Todo): void {
+      patchState(store, addEntity(todo, { collection: 'todo' }));
+    },
+    removeTodo(id: number): void {
+      patchState(store, removeEntity(id, { collection: 'todo' }));
+    },
+  }))
+);
+
+</code-example>
+
+<div class="alert is-helpful">
+
+Named entity collections allow managing multiple collections in a single store by using the `withEntities` feature multiple times.
+
+```ts
+export const LibraryStore = signalStore(
+  withEntities({ entity: type<Book>(), collection: 'book' }),
+  withEntities({ entity: type<Author>(), collection: 'author' }),
+  withEntities({ entity: type<Category>(), collection: 'category' }),
+  withMethods((store) => ({
+    addBook(book: Book): void {
+      patchState(store, addEntity(book, { collection: 'book' }));
+    },
+    addAuthor(author: Author): void {
+      patchState(store, addEntity(author, { collection: 'author' }));
+    },
+    addCategory(category: Category): void {
+      patchState(store, addEntity(category, { collection: 'category' }));
+    },
+  }))
+);
+```
+
+Although it is possible to manage multiple collections in one store, in most cases, it is recommended to have dedicated stores for each entity type.
+
+</div>
+
+## `entityConfig`
+
+The `entityConfig` function reduces repetitive code when defining a custom entity configuration and ensures strong typing.
+It accepts a config object where the entity type is required, and the collection name and custom ID selector are optional.
+
+<code-example header="todos-store.ts">
+
+import {
+  patchState,
+  signalStore,
+  type,
+  withMethods,
+} from '@ngrx/signals';
+import {
+  addEntity,
+  entityConfig,
+  removeEntity,
+  withEntities,
+} from '@ngrx/signals/entities';
+
+type Todo = {
+  key: number;
+  text: string;
+  completed: boolean;
+};
+
+const todoConfig = entityConfig({
+  entity: type&lt;Todo&gt;(),
+  collection: 'todo',
+  selectId: (todo) => todo.key,
+});
+
+export const TodosStore = signalStore(
+  withEntities(todoConfig),
+  withMethods((store) => ({
+    addTodo(todo: Todo): void {
+      patchState(store, addEntity(todo, todoConfig));
+    },
+    removeTodo(todo: Todo): void {
+      patchState(store, removeEntity(todo, todoConfig));
+    },
+  }))
+);
+
+</code-example>
+
+## Private Entity Collections
+
+Private entity collections are defined by using the `_` prefix for the collection name.
+
+```ts
+const todoConfig = entityConfig({
+  entity: type<Todo>(),
+  // 👇 private collection
+  collection: '_todo',
+});
+
+const TodosStore = signalStore(
+  withEntities(todoConfig),
+  withComputed(({ _todoEntities }) => ({
+    // 👇 exposing entity array publicly
+    todos: _todoEntities,
+  }))
+);
+
+@Component({
+  /* ... */
+  template: `
+    <h1>Todos</h1>
+    <ngrx-todo-list [todos]="store.todos()" />
+  `,
+  providers: [TodosStore],
+})
+class Todos {
+  readonly store = inject(TodosStore);
+}
+```
+
+<div class="alert is-helpful">
+
+Learn more about private store members in the [Private Store Members](/guide/signals/signal-store/private-store-members) guide.
+
+</div>
+<div class="alert is-important">
+
+The Events plugin is currently marked as experimental.
+This means its APIs are subject to change, and modifications may occur in future versions without standard breaking change announcements until it is deemed stable.
+
+</div>
+
+# Events
+
+The Events plugin extends SignalStore with an event-based state management layer.
+It takes inspiration from the original Flux architecture and incorporates the best practices and patterns from NgRx Store, NgRx Effects, and RxJS.
+
+<figure>
+  <img src="generated/images/guide/signals/app-architecture-with-events-plugin.png" alt="Application Architecture with Events Plugin" width="100%" height="100%" />
+</figure>
+
+The application architecture with the Events plugin is composed of the following building blocks:
+
+1. **Event:** Describes an occurrence within the system. Events are dispatched to trigger state changes and/or side effects.
+2. **Dispatcher:** An event bus that forwards events to their corresponding handlers in the stores.
+3. **Store:** Contains reducers and effects that manage state and handle side effects, maintaining a clean and predictable application flow.
+4. **View:** Reflects state changes and dispatches new events, enabling continuous interaction between the user interface and the underlying system.
+
+By dispatching events and reacting to them, the _what_ (the event that occurred) is decoupled from the _how_ (the state changes or side effects that result), leading to predictable data flow and more maintainable code.
+
+<div class="alert is-helpful">
+
+While the default SignalStore approach is sufficient for most use cases, the Events plugin excels in more advanced scenarios that involve inter-store coordination or benefit from a decoupled architecture.
+
+</div>
+
+## Defining Event Creators
+
+Event creators are defined using utilities provided by the Events plugin.
+The `event` function is used for declaring individual event creators, while the `eventGroup` function enables grouping multiple event creators under a common source.
+
+### Using `event` Function
+
+The simplest way to define an event creator is with the `event` function, 
+which takes an event type and an optional payload schema.
+Calling the event creator produces an event object with a `type` property and, if a payload is defined, a `payload` property.
+
+<code-example header="book-search-events.ts">
+
+import { type } from '@ngrx/signals';
+import { event } from '@ngrx/signals/events';
+
+export const opened = event('[Book Search Page] Opened');  
+export const queryChanged = event(
+  '[Book Search Page] Query Changed',
+  // 👇 The payload type is defined using the `type` function.
+  type&lt;string&gt;(),
+); 
+
+</code-example>
+
+<code-example header="books-api-events.ts">
+
+import { type } from '@ngrx/signals';
+import { event } from '@ngrx/signals/events';
+import { Book } from './book';
+
+export const loadedSuccess = event('[Books API] Loaded Success', type&lt;Book[]&gt;());
+export const loadedFailure = event('[Books API] Loaded Failure', type&lt;string&gt;());
+
+</code-example>
+
+<div class="alert is-important">
+
+It's recommended to use the "[Source] EventName" pattern when defining the event type.
+
+</div>
+
+Each of these exported constants is an event creator function.
+When called, it returns a plain event object.
+For example, calling `opened()` returns an object `{ type: '[Book Search Page] Opened' }`, and calling `loadedSuccess([book1, book2])` returns an object `{ type: '[Books API] Loaded Success', payload: [book1, book2] }`.
+The `type` property serves as a unique identifier for the event, and the optional `payload` carries additional data.
+
+### Using `eventGroup` Function
+
+Defining many events with the same source can become repetitive.
+The `eventGroup` API is used to create a set of events with the common source.
+This function takes an object with two properties:
+
+- `source`: Identifies the origin of the event group (e.g., 'Book Search Page', 'Books API').
+- `events`: A dictionary of named event creators, where each key defines the event name and each value defines the payload type.
+
+The type of all event creators in the group are prefixed with the provided `source`.
+
+<code-example header="book-search-events.ts">
+
+import { type } from '@ngrx/signals';
+import { eventGroup } from '@ngrx/signals/events';
+
+export const bookSearchEvents = eventGroup({
+  source: 'Book Search Page',
+  events: {
+    // 👇 Defining an event creator without a payload.
+    opened: type&lt;void&gt;(),
+    queryChanged: type&lt;string&gt;(),
+  },
+});
+
+</code-example>
+
+<code-example header="books-api-events.ts">
+
+import { type } from '@ngrx/signals';
+import { eventGroup } from '@ngrx/signals/events';
+import { Book } from './book';
+
+export const booksApiEvents = eventGroup({
+  source: 'Books API',
+  events: {
+    loadedSuccess: type&lt;Book[]&gt;(),
+    loadedFailure: type&lt;string&gt;(),
+  },
+});
+
+</code-example>
+
+Event types are automatically formatted as "[Source] EventName".
+For example, calling `bookSearchEvents.opened()` yields `{ type: '[Book Search Page] opened' }`, and `booksApiEvents.loadedSuccess([book1, book2])` yields `{ type: '[Books API] loadedSuccess', payload: [book1, book2] }`.
+
+## Performing State Changes
+
+To handle state changes in response to events, the Events plugin provides the `withReducer` feature.
+Case reducers are defined using the `on` function, which maps one or more events to a case reducer handler.
+A handler is a function that receives the dispatched event as the first and the current state as the second argument.
+The return value of a case reducer handler can be a partial state object, a partial state updater, or an array of partial state objects and/or updaters.
+
+<code-example header="book-search-store.ts">
+
+import { signalStore, withState } from '@ngrx/signals';
+import { on, withReducer } from '@ngrx/signals/events';
+import { bookSearchEvents } from './book-search-events';
+import { booksApiEvents } from './books-api-events';
+import { Book } from './book';
+
+type State = { query: string; books: Book[]; isLoading: boolean };
+
+export const BookSearchStore = signalStore(
+  withState&lt;State&gt;({ query: '', books: [], isLoading: false }),
+  withReducer(
+    on(bookSearchEvents.opened, () => ({ isLoading: true })),
+    on(
+      bookSearchEvents.queryChanged,
+      ({ payload: query }) => ({ query, isLoading: true }),
+    ),
+    on(
+      booksApiEvents.loadedSuccess,
+      ({ payload: books }) => ({ books, isLoading: false }),
+    ),
+    on(booksApiEvents.loadedFailure, () => ({ isLoading: false })),
+  ),
+);
+
+</code-example>
+
+When an event is dispatched, the corresponding case reducer logic runs and the SignalStore's state is updated.
+
+<div class="alert is-helpful">
+
+In addition to partial state objects, it's also possible to return a partial state updater or an array of partial state objects and/or updaters as the result of a case reducer handler.
+
+```ts
+const incrementBy = event('[Counter Page] Increment By', type<number>());
+const increment = event('[Counter Page] Increment');
+const incrementBoth = event('[Counter Page] Increment Both');
+
+export const CounterStore = signalStore(
+  withState({ count1: 0, count2: 0 }),
+  withReducer(
+    // 👇 Returning a partial state object.
+    on(incrementBy, (event, state) => ({
+      count1: state.count1 + event.payload,
+    })),
+    // 👇 Returning a partial state updater.
+    on(increment, () => incrementFirst()),
+    // 👇 Returning an array of partial state updaters.
+    on(incrementBoth, () => [incrementFirst(), incrementSecond()]),
+  ),
+);
+
+function incrementFirst(): PartialStateUpdater<{ count1: number }> {
+  return (state) => ({ count1: state.count1 + 1 });
+}
+
+function incrementSecond(): PartialStateUpdater<{ count2: number }> {
+  return (state) => ({ count2: state.count2 + 1 });
+}
+```
+
+</div>
+
+## Performing Side Effects
+
+Side effects are handled using the `withEffects` feature.
+This feature accepts a function that receives the store instance as an argument and returns a dictionary of effects.
+Each effect is defined as an observable that reacts to specific events using the `Events` service.
+This service provides the `on` method that returns an observable of dispatched events filtered by the specified event types.
+If an effect returns a new event, that event is automatically dispatched.
+
+<code-example header="book-search-store.ts">
+
+// ... other imports
+import { switchMap, tap } from 'rxjs';
+import { Events, withEffects } from '@ngrx/signals/events';
+import { mapResponse } from '@ngrx/operators';
+import { BooksService } from './books-service';
+
+export const BookSearchStore = signalStore(
+  // ... other features
+  withEffects(
+    (
+      store,
+      events = inject(Events),
+      booksService = inject(BooksService),
+    ) => ({
+      loadBooksByQuery$: events
+        .on(bookSearchEvents.opened, bookSearchEvents.queryChanged)
+        .pipe(
+          switchMap(() =>
+            booksService.getByQuery(store.query()).pipe(
+              mapResponse({
+                next: (books) => booksApiEvents.loadedSuccess(books),
+                error: (error: { message: string }) =>
+                  booksApiEvents.loadedFailure(error.message),
+              }),
+            ),
+          ),
+        ),
+      logError$: events
+        .on(booksApiEvents.loadedFailure)
+        .pipe(tap(({ payload }) => console.error(payload))),
+    }),
+  ),
+);
+
+</code-example>
+
+## Reading State
+
+The Events plugin doesn’t change how the state is exposed or consumed.
+It only changes how the state is updated (via reducers rather than direct method calls).
+Therefore, components can access state and computed signals by using the store instance.
+
+<code-example header="book-search.ts">
+
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { BookSearchStore } from './book-search-store';
+
+@Component({
+  selector: 'ngrx-book-search',
+  imports: [FormsModule],
+  template: `
+    &lt;h1&gt;Search Books&lt;/h1&gt;
+  
+    &lt;input type="text" [ngModel]="store.query()" /&gt;
+    
+    @if (store.isLoading()) {
+      &lt;p&gt;Loading...&lt;/p&gt;
+    }
+
+    &lt;ul&gt;
+      @for (book of store.books(); track book.id) {
+        &lt;li&gt;{{ book.title }}&lt;/li&gt;
+      }
+    &lt;/ul&gt;
+  `,
+  providers: [BookSearchStore],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class BookSearch {
+  readonly store = inject(BookSearchStore);
+}
+
+</code-example>
+
+## Dispatching Events
+
+Once events and their corresponding handlers have been defined, the remaining step is to dispatch events in response to user interactions or other triggers.
+Dispatching an event allows any matching reducers or effects to process it accordingly.
+
+### Using `Dispatcher` Service
+
+To initiate state changes or side effects, events can be dispatched using the `Dispatcher` service.
+It provides the `dispatch` method that takes an event as input.
+
+<code-example header="book-search.ts">
+
+// ... other imports
+import { Dispatcher } from '@ngrx/signals/events';
+import { bookSearchEvents } from './book-search-events';
+
+@Component({
+  // ... component config
+  template: `
+    &lt;h1>Search Books&lt;/h1&gt;
+  
+    &lt;input
+      type="text"
+      [ngModel]="store.query()"
+      (ngModelChange)="changeQuery($event)"
+    /&gt;
+
+    &lt;!-- ... rest of the template --&gt;
+  `,
+})
+export class BookSearch {
+  readonly dispatcher = inject(Dispatcher);
+  readonly store = inject(BookSearchStore);
+
+  constructor() {
+    this.dispatcher.dispatch(bookSearchEvents.opened());
+  }
+
+  changeQuery(query: string): void {
+    this.dispatcher.dispatch(bookSearchEvents.queryChanged(query));
+  }
+}
+
+</code-example>
+
+### Using `injectDispatch` Function
+
+Manually injecting the `Dispatcher` service and invoking the `dispatch` method for each event can lead to repetitive code.
+To streamline this process, the Events plugin provides the `injectDispatch` utility.
+When invoked with a dictionary of event creators, this function returns an object that reflects the structure of the event definitions.
+Each member of the returned object is a method that, when called, automatically creates and dispatches the corresponding event.
+
+<code-example header="book-search.ts">
+
+// ... other imports
+import { injectDispatch } from '@ngrx/signals/events';
+
+@Component({
+  // ... component config
+  template: `
+    &lt;h1&gt;Search Books&lt;/h1&gt;
+  
+    &lt;input
+      type="text"
+      [ngModel]="store.query()"
+      (ngModelChange)="dispatch.queryChanged($event)"
+    /&gt;
+
+    &lt;!-- ... rest of the template --&gt;
+  `,
+})
+export class BookSearch {
+  readonly dispatch = injectDispatch(bookSearchEvents);
+  readonly store = inject(BookSearchStore);
+
+  constructor() {
+    this.dispatch.opened();
+  }
+}
+
+</code-example>
+# Testing
+
+A SignalStore is a straightforward Angular service, and the same testing techniques applied to other services also apply to SignalStore. This guide provides examples for common testing scenarios.
+
+One of the challenges in testing is managing asynchronous tasks and mocking dependencies. Although the examples use Jest, the same principles are applicable to other testing frameworks.
+
+There are two primary scenarios for testing:
+
+1. Testing the SignalStore itself.
+2. Testing a component or service that utilizes the SignalStore.
+
+In the first scenario, the dependencies of the SignalStore should be mocked, while in the second scenario, the SignalStore itself needs to be mocked.
+
+---
+
+When testing the SignalStore, interaction should occur through its public API, as any component or service would.
+
+A key concern in testing is maintainability. The more tests are coupled to internal implementations, the more frequently they are likely to break. Public APIs are generally more stable and less prone to change.
+
+For example, when testing the store in a loading state, avoid directly setting the loading property. Instead, trigger a loading method and assert against an exposed computed property or slice. This approach reduces dependency on internal implementations, such as properties set during the loading state.
+
+From this perspective, private properties or methods of the SignalStore should not be accessed.
+
+---
+
+The SignalStore is a function that returns a class, allowing tests to instantiate the class and test it without using `TestBed`.
+
+However, in practice, `TestBed` is typically used due to its numerous advantages, such as the ability to mock dependencies and trigger the execution of effects.
+
+Additionally, key features of the SignalStore do not function properly if they do not run in an injection context. Examples include `rxMethod`, the use of `inject` within `withMethods()`, and `withHooks()`.
+
+<div class="alert is-helpful">
+
+**Note:** Using the `TestBed` is also the recommendation of the [Angular team](https://github.com/angular/angular/issues/54438#issuecomment-1971813177).
+
+</div>
+
+## Testing the SignalStore
+
+The following example demonstrates the testing of a SignalStore:
+
+### Globally provided
+
+<code-example header="movies.store.ts">
+
+import { signalStore, withState } from '@ngrx/signals';
+
+type Movie = {
+  id: number;
+  name: string;
+};
+
+type State = { movies: Movie[] };
+
+export const MoviesStore = signalStore(
+  { providedIn: 'root' },
+  withState&lt;State&gt;({
+    movies: [
+      { id: 1, name: 'A New Hope' },
+      { id: 2, name: 'Into Darkness' },
+      { id: 3, name: 'The Lord of the Rings' },
+    ],
+  })
+);
+
+</code-example>
+
+The `TestBed` instantiates the `MoviesStore`, enabling immediate testing.
+
+<code-example header="movies.store.spec.ts">
+
+import { MoviesStore } from './movies-store';
+import { TestBed } from '@angular/core/testing';
+
+describe('MoviesStore', () => {
+  it('should verify that three movies are available', () => {
+    const store = TestBed.inject(MoviesStore);
+
+    expect(store.movies()).toHaveLength(3);
+  });
+});
+
+</code-example>
+
+### Locally Provided
+
+This is possible due to the `MoviesStore` being provided globally. For locally provided stores, some adjustments to the test are required.
+
+<code-example header="movies.store.ts">
+
+export const MoviesStore = signalStore(
+  withState({
+    movies: [
+      // ... entries
+    ],
+  })
+);
+
+</code-example>
+
+The required addition is that the internal `TestingModule` must provide the `MoviesStore`.
+
+<code-example header="movies.store.spec.ts">
+
+import { MoviesStore } from './movies.store';
+
+describe('MoviesStore', () => {
+  it('should verify that three movies are available', () => {
+    TestBed.configureTestingModule({
+      providers: [MoviesStore],
+    });
+
+    const store = TestBed.inject(MoviesStore);
+
+    expect(store.movies()).toHaveLength(3);
+  });
+});
+
+</code-example>
+
+### `unprotected`
+
+The `unprotected` function from the `@ngrx/signals/testing` plugin is used to update the protected state of a SignalStore for testing purposes.
+This utility bypasses state encapsulation, making it possible to test state changes and their impacts.
+
+```ts
+// counter.store.ts
+const CounterStore = signalStore(
+  { providedIn: 'root' },
+  withState({ count: 1 }),
+  withComputed(({ count }) => ({
+    doubleCount: computed(() => count() * 2),
+  })),
+);
+
+// counter.store.spec.ts
+import { TestBed } from '@angular/core/testing';
+import { unprotected } from '@ngrx/signals/testing';
+
+describe('CounterStore', () => {
+  it('recomputes doubleCount on count changes', () => {
+    const counterStore = TestBed.inject(CounterStore);
+
+    patchState(unprotected(counterStore), { count: 10 });
+    expect(counterStore.doubleCount()).toBe(20);
+  });
+});
+```
+
+### `withComputed`
+
+Testing derived values of `withComputed` is also straightforward.
+
+<code-example header="movies.store.ts">
+
+export const MoviesStore = signalStore(
+  withState({
+    movies: [
+      // ... entries
+    ],
+  }),
+  withComputed((state) => ({
+    moviesCount: computed(() => state.movies().length),
+  }))
+);
+
+</code-example>
+
+<code-example header="movies.store.spec.ts">
+
+import { MoviesStore } from './movies.store';
+
+describe('MoviesStore', () => {
+  it('should verify that three movies are available', () => {
+    const store = TestBed.inject(MoviesStore);
+
+    expect(store.moviesCount()).toBe(3);
+  });
+});
+
+</code-example>
+
+### `withMethods`, Dependency Injection, and Asynchronous Tasks
+
+A loading method asynchronously retrieves movies by studio in this scenario.
+
+<code-example header="movies.store.ts">
+
+import { signalStore, withState } from '@ngrx/signals';
+
+type State = { studio: string; movies: Movie[]; loading: boolean };
+
+export const MoviesStore = signalStore(
+  withState&lt;State&gt;({
+    studio: '',
+    movies: [],
+    loading: false,
+  }),
+  withMethods((store) => {
+    const moviesService = store.inject(MoviesService);
+
+    return {
+      async load(studio: string) {
+        this.patchState({ loading: true });
+        const movies = await moviesService.loadMovies(studio);
+        this.patchState(store, { studio, movies, loading: false });
+      },
+    };
+  })
+);
+
+</code-example>
+
+The `MoviesService` is mocked in the test, with the implementation returning the result as a `Promise`.
+
+<code-example header="movies.store.spec.ts">
+
+describe('MoviesStore', () => {
+  it('should load movies of Warner Bros', fakeAsync(() => {
+    const moviesService = {
+      load: () =>
+        Promise.resolve([
+          { id: 1, name: 'Harry Potter' },
+          { id: 2, name: 'The Dark Knight' },
+        ]),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: MoviesService,
+          useValue: moviesService,
+        },
+      ],
+    });
+
+    const store = TestBed.inject(MoviesStore);
+    store.load('Warner Bros');
+    expect(store.loading()).toBe(true);
+    
+    tick();
+
+    expect(store.moviesCount()).toBe(2);
+    expect(store.loading()).toBe(false);
+  }));
+});
+
+</code-example>
+
+<div class="alert is-helpful">
+
+**Note:** Manually mocking dependencies is not required. Libraries such as ng-mocks, @testing-library/angular, and [jest|jasmine]-auto-spies can be used for this purpose.
+
+</div>
+
+### `rxMethod`
+
+The `load` method is created using `rxMethod` to accommodate a component that provides an input field for the studio and initiates loading as soon as a user types in a name.
+
+In this scenario, the `MovieService` returns an `Observable<Movie[]>` instead of a `Promise<Movie[]>`.
+
+<code-example header="movies.store.ts">
+
+export const MoviesStore = signalStore(
+  // ... code omitted
+  withMethods((store, moviesService = inject(MoviesService)) => ({
+    load: rxMethod&lt;string&gt;(
+      pipe(
+        tap(() => patchState(store, { loading: true })),
+        switchMap((studio) =>
+          moviesService.load(studio).pipe(
+            tapResponse({
+              next: (movies) =>
+                patchState(store, { movies, loading: false }),
+              error: console.error,
+            })
+          )
+        )
+      )
+    ),
+  }))
+);
+
+</code-example>
+
+Since `rxMethod` accepts a string as a parameter, the previous test remains valid.
+
+An additional focus in testing is ensuring proper handling of race conditions, which is why `switchMap` is used.
+
+The parameter's type can also be `Signal<number>` or `Observable<number>`, in addition to `number`.
+
+#### With Observables
+
+The goal is to test whether the `load` method properly handles the scenario where a new studio name is entered before or after the previous request has completed.
+
+<code-example header="movies.store.spec.ts">
+
+describe('MoviesStore', () => {
+  // ... beforeEach and afterEach omitted
+
+  const setup = () => {
+    const moviesService = {
+      load: jest.fn((studio: string) =>
+        of([
+          studio === 'Warner Bros'
+            ? { id: 1, name: 'Harry Potter' }
+            : { id: 2, name: 'Jurassic Park' }
+        ]).pipe(delay(100))
+      ),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: MoviesService,
+          useValue: moviesService,
+        },
+      ],
+    });
+
+    return TestBed.inject(MoviesStore);
+  };
+
+  it('should load two times', fakeAsync(() => {
+    const store = setup();
+
+    const studio$ = new Subject&lt;string&gt;();
+    store.load(studio$);
+    studio$.next('Warner Bros');
+
+    tick(100);
+    expect(store.movies()).toEqual([{ id: 1, name: 'Harry Potter' }]);
+
+    studio$.next('Universal');
+    tick(100);
+    expect(store.movies()).toEqual([{ id: 2, name: 'Jurassic Park' }]);
+  }));
+
+  it('should cancel a running request when a new one is made', fakeAsync(() => {
+    const store = setup();
+
+    const studio$ = new Subject&lt;string&gt;();
+    store.load(studio$);
+    studio$.next('Warner Bros');
+
+    tick(50);
+    studio$.next('Universal');
+
+    tick(50);
+    expect(store.movies()).toEqual([]);
+    expect(store.loading()).toBe(true);
+
+    tick(50);
+    expect(store.movies()).toEqual([{ id: 2, name: 'Jurassic Park' }]);
+    expect(store.loading()).toBe(false);
+  }));
+});
+
+</code-example>
+
+By utilizing the testing framework's function to manage time, both scenarios can be verified.
+
+The test also employs a setup function to prevent code duplication, a common pattern in testing and an alternative to the `beforeEach` function. In this case, each test can choose whether to use the setup function or not.
+
+#### With Signals
+
+Testing both scenarios with a `Signal` type as input is similar to testing with Observables.
+
+This similarity arises primarily due to the asynchronous tasks involved.
+
+<code-example header="movies.store.spec.ts">
+
+describe('MoviesStore', () => {
+  // ... setup omitted
+
+  it('should test two sequential loads with a Signal', fakeAsync(() => {
+    const store = setup();
+    const studio = signal('Warner Bros');
+    store.load(studio);
+
+    tick(100);
+    expect(store.movies()).toEqual([{ id: 1, name: 'Harry Potter' }]);
+
+    studio.set('Universal');
+    tick(100);
+    expect(store.movies()).toEqual([{ id: 2, name: 'Jurassic Park' }]);
+  }));
+
+  it('should cancel a running request when a new one is made via a Signal', fakeAsync(() => {
+    const store = setup();
+    const studio = signal('Warner Bros');
+
+    effect(() => {
+      console.log(studio());
+    });
+    store.load(studio);
+
+    tick(50);
+
+    studio.set('Universal');
+    tick(50);
+    expect(store.movies()).toEqual([]);
+    expect(store.loading()).toBe(true);
+
+    tick(50);
+    expect(store.movies()).toEqual([{ id: 2, name: 'Jurassic Park' }]);
+    expect(store.loading()).toBe(false);
+  }));
+});
+
+</code-example>
+
+It is important to account for the glitch-free effect when using Signals. The `rxMethod` relies on `effect`, which may need to be triggered manually through `TestBed.tick()`.
+
+If the mocked `MovieService` operates synchronously, the following test fails unless `TestBed.tick()` is called.
+
+<code-example header="movies.store.spec.ts">
+
+describe('MoviesStore', () => {
+  // ... beforeEach, and afterEach omitted
+
+  it('should depend on flushEffects because of synchronous execution', () => {
+    const moviesService = {
+      load: jest.fn((studio: string) =>
+        of([
+          studio === 'Warner Bros'
+            ? { id: 1, name: 'Harry Potter' }
+            : { id: 2, name: 'Jurassic Park' }
+        ])
+      ),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: MoviesService,
+          useValue: moviesService,
+        },
+      ],
+    });
+
+    const store = TestBed.inject(MoviesStore);
+    const studio = signal('Warner Bros');
+    store.load(studio);
+    TestBed.tick(); // required
+    expect(store.movies()).toEqual([{ id: 1, name: 'Harry Potter' }]);
+
+    studio.set('Universal');
+    TestBed.tick(); // required
+    expect(store.movies()).toEqual([{ id: 2, name: 'Jurassic Park' }]);
+  });
+});
+
+</code-example>
+
+## Mocking the SignalStore
+
+What applies to testing the SignalStore also applies to mocking it. The SignalStore functions like any other service, meaning it can be mocked using the same tools and techniques applied to other services.
+
+The `MovieComponent` utilizes the `MoviesStore` to display movies:
+
+<code-example header="movies.component.ts">
+
+@Component({
+  selector: 'app-movies',
+  template: `
+    &lt;input
+      type="text"
+      [(ngModel)]="studio"
+      [disabled]="store.loading()"
+      placeholder="Name of Studio"
+    /&gt;
+
+    &lt;ul&gt;
+      @for (movie of store.movies(); track movie.id) {
+      &lt;p&gt;{{ movie.id }}: {{ movie.name }}&lt;/p&gt;
+      }
+    &lt;/ul&gt;
+  `,
+  imports: [FormsModule],
+})
+export class MoviesComponent {
+  protected studio = signal('');
+  protected readonly store = inject(MoviesStore);
+
+  constructor() {
+    this.store.load(this.studio);
+  }
+}
+
+</code-example>
+
+### Native Mocking
+
+<code-example header="movies.component.spec.ts">
+
+it('should show movies (native Jest)', () => {
+  const load = jest.fn&lt;void, [Signal&lt;string&gt;]&gt;();
+
+  const moviesStore = {
+    movies: signal(new Array&lt;Movie&gt;()),
+    loading: signal(false),
+    load,
+  };
+
+  TestBed.configureTestingModule({
+    imports: [MoviesComponent],
+    providers: [
+      {
+        provide: MoviesStore,
+        useValue: moviesStore,
+      },
+    ],
+  });
+
+  const fixture = TestBed.createComponent(MoviesComponent);
+  fixture.autoDetectChanges(true);
+
+  const studio = load.mock.calls[0][0];
+  const input: HTMLInputElement = fixture.debugElement.query(By.css('input')).nativeElement;
+
+  expect(studio()).toBe('');
+
+  input.value = 'Warner Bros';
+  input.dispatchEvent(new Event('input'));
+  expect(studio()).toBe('Warner Bros');
+
+  moviesStore.movies.set([
+    { id: 1, name: 'Harry Potter' },
+    { id: 2, name: 'The Dark Knight' },
+  ]);
+  fixture.detectChanges();
+
+  const movieNames = fixture.debugElement.queryAll(By.css('p')).map((el) =>
+    el.nativeElement.textContent
+  );
+  expect(movieNames).toEqual(['1: Harry Potter', '2: The Dark Knight']);
+});
+
+</code-example>
+
+The test mocks only the properties and methods used by the component in the specific test. Even if a SignalStore contains additional methods, it is not necessary to mock all of them.
+
+### "Partial Mocking" via Spies
+
+Partial mocking can be used to mock only the `load` method. This approach allows computed properties to function correctly without requiring them to be mocked.
+
+<code-example header="movies.component.spec.ts">
+
+it('should show movies (spy)', () => {
+  TestBed.configureTestingModule({
+    imports: [MoviesComponent],
+    providers: [
+      {
+        provide: MoviesService,
+        useValue: {},
+      },
+    ],
+  });
+
+  const moviesStore = TestBed.inject(MoviesStore);
+  const loadSpy = jest.spyOn(moviesStore, 'load');
+  const fixture = TestBed.createComponent(MoviesComponent);
+
+  fixture.autoDetectChanges(true);
+
+  const studio = loadSpy.mock.calls[0][0];
+  if (studio instanceof Observable || typeof studio === 'string') {
+    throw new Error('Expected signal');
+  }
+
+  const input: HTMLInputElement = fixture.debugElement.query(By.css('input')).nativeElement;
+
+  expect(studio()).toBe('');
+
+  input.value = 'Warner Bros';
+  input.dispatchEvent(new Event('input'));
+  expect(studio()).toBe('Warner Bros');
+
+  patchState(moviesStore, {
+    movies: [
+      { id: 1, name: 'Harry Potter' },
+      { id: 2, name: 'The Dark Knight' },
+    ],
+  });
+
+  fixture.detectChanges();
+
+  const movies = fixture.debugElement.queryAll(By.css('p')).map((el) =>
+    el.nativeElement.textContent
+  );
+  expect(movies).toEqual(['1: Harry Potter', '2: The Dark Knight']);
+});
+
+</code-example>
+
+This version requires the `MoviesStore` state to be unprotected.
+
+## Integration Tests
+
+Services attached to a component are often simple, and writing unit tests for them may not always be necessary, particularly when considering the returned value and maintenance costs. In such cases, it is more effective to test the services together with the component as a whole. This type of testing is commonly referred to as integration testing.
+
+The same applies to the SignalStore. If the SignalStore, such as the `MoviesStore`, is relatively simple, a single test can cover both the `MoviesComponent` and the `MoviesStore`. However, the `HttpClient` must still be replaced with a test double.
+
+<code-example header="movies.spec.ts">
+
+it('should show movies with MoviesStore', async () => {
+  const fixture = TestBed.configureTestingModule({
+    imports: [MoviesComponent],
+    providers: [provideHttpClient(), provideHttpClientTesting()],
+  }).createComponent(MoviesComponent);
+
+  const ctrl = TestBed.inject(HttpTestingController);
+
+  fixture.autoDetectChanges(true);
+
+  const input: HTMLInputElement = fixture.debugElement.query(
+    By.css('input')
+  ).nativeElement;
+  input.value = 'Warner Bros';
+  input.dispatchEvent(new Event('input'));
+
+
+  ctrl.expectOne('https://movies.com/studios?query=Warner%20Bros').flush(
+    [
+      {id: 1, name: 'Harry Potter'},
+      {id: 2, name: 'The Dark Knight'},
+    ]
+  )
+  await fixture.whenStable()
+
+  const movies = fixture.debugElement.queryAll(By.css('p')).map((el) =>
+    el.nativeElement.textContent
+  );
+  expect(movies).toEqual(['1: Harry Potter', '2: The Dark Knight']);
+  ctrl.verify();
+});
+
+</code-example>
+
+
+This test assumes that the `MoviesService` sends a request.
+
+## Testing Custom Extensions
+
+An extension is responsible for playing a movie and tracking the duration of viewership. The extension provides `play` and `stop` methods, along with a Signal containing the movie's ID and the time spent watching it.
+
+<code-example header="with-play-tracking.ts">
+
+type PlayTrackingState = {
+  _currentId: number;
+  _status: 'playing' | 'stopped';
+  _startedAt: Date | undefined;
+  trackedData: Record&lt;number, number&gt;;
+};
+
+const initialState: PlayTrackingState = {
+  _currentId: 0,
+  _status: 'stopped',
+  _startedAt: undefined,
+  trackedData: {},
+};
+
+export const withPlayTracking = () =>
+  signalStoreFeature(
+    withState(initialState),
+    withMethods((store) => {
+      const stop = () => {
+        const startedAt = store._startedAt();
+        if (!startedAt || store._status() === 'stopped') {
+          return;
+        }
+
+        const timeSpent = new Date().getTime() - startedAt.getTime();
+        const alreadySpent = store.trackedData()[store._currentId()] ?? 0;
+        patchState(store, (state) => ({
+          _currentId: 0,
+          _status: 'stopped' as const,
+          trackedData: { ...state.trackedData, [state._currentId]: alreadySpent + timeSpent },
+        }));
+      };
+
+      return {
+        play(id: number) {
+          stop();
+          patchState(store, {
+            _currentId: id,
+            _status: 'playing',
+            _startedAt: new Date(),
+          });
+        },
+        stop,
+      };
+    })
+  );
+
+</code-example>
+
+There are two options for testing this extension: in combination with the `MoviesStore` or in isolation.
+
+When tested with the `MoviesStore`, the same approach as in previous examples is followed.
+
+To test the extension in isolation, an artificial "Wrapper" SignalStore is created. The test process remains straightforward.
+
+<code-example header="with-play-tracking.spec.ts">
+
+describe('withTrackedPlay', () => {
+  const TrackedPlayStore = signalStore({ providedIn: 'root' }, withPlayTracking());
+
+  it('should track movies', fakeAsync(() => {
+    const store = TestBed.inject(TrackedPlayStore);
+
+    store.play(1);
+    tick(1000);
+
+    store.stop();
+    store.play(2);
+    tick(1000);
+
+    store.play(3);
+    tick(1000);
+
+    store.play(1);
+    tick(1000);
+    store.stop();
+
+    expect(store.trackedData()).toEqual({ 1: 2000, 2: 1000, 3: 1000 });
+  }))
+});
+
+</code-example>
+# Installation
+
+## Installing with `ng add`
+
+You can install the `@ngrx/signals` to your project with the following `ng add` command <a href="https://angular.dev/cli/add" target="_blank">(details here)</a>:
+
+```sh
+ng add @ngrx/signals@latest
+```
+
+This command will automate the following steps:
+
+1. Update `package.json` > `dependencies` with `@ngrx/signals`.
+2. Run the package manager to install the added dependency.
+
+
+## Installing with `npm`
+
+For more information on using `npm` check out the docs <a href="https://docs.npmjs.com/cli/install" target="_blank">here</a>.
+
+```sh
+npm install @ngrx/signals --save
+```
+
+## Installing with `yarn`
+
+For more information on using `yarn` check out the docs <a href="https://yarnpkg.com/getting-started/usage#installing-all-the-dependencies" target="_blank">here</a>.
+
+```sh
+yarn add @ngrx/signals
+```
+# SignalState
+
+SignalState is a lightweight utility designed for managing signal-based state in a concise and minimalistic manner.
+It's suitable for managing modest-sized states and can be used directly in components, services, or standalone functions.
+
+## Creating a SignalState
+
+SignalState is instantiated using the `signalState` function, which accepts an initial state as an input argument.
+
+```ts
+import { signalState } from '@ngrx/signals';
+import { User } from './user';
+
+type UserState = { user: User; isAdmin: boolean };
+
+const userState = signalState<UserState>({
+  user: { firstName: 'Eric', lastName: 'Clapton' },
+  isAdmin: false,
+});
+```
+
+The state's type must be a record/object literal. Add arrays or primitive values to properties.
+
+`signalState` returns an extended version of a signal that possesses all the capabilities of a read-only signal.
+
+```ts
+import { computed, effect } from '@angular/core';
+
+// 👇 Creating computed signals.
+const userStateStr = computed(() => JSON.stringify(userState()));
+
+// 👇 Performing side effects.
+effect(() => console.log('userState', userState()));
+```
+
+Additionally, the `signalState` function generates signals for each state property.
+
+```ts
+const user = userState.user; // type: DeepSignal<User>
+const isAdmin = userState.isAdmin; // type: Signal<boolean>
+
+console.log(user()); // logs: { firstName: 'Eric', lastName: 'Clapton' }
+console.log(isAdmin()); // logs: false
+```
+
+When a state property holds an object as its value, the `signalState` function generates a `DeepSignal`.
+It can be used as a regular read-only signal, but it also contains signals for each property of the object it refers to.
+
+```ts
+const firstName = user.firstName; // type: Signal<string>
+const lastName = user.lastName; // type: Signal<string>
+
+console.log(firstName()); // logs: 'Eric'
+console.log(lastName()); // logs: 'Clapton'
+```
+
+<div class="alert is-helpful">
+
+For enhanced performance, deeply nested signals are generated lazily and initialized only upon first access.
+
+</div>
+
+## Updating State
+
+The `patchState` function provides a type-safe way to perform updates on pieces of state.
+It takes a SignalState or SignalStore instance as the first argument, followed by a sequence of partial states or partial state updaters as additional arguments.
+
+```ts
+import { patchState } from '@ngrx/signals';
+
+// 👇 Providing a partial state object.
+patchState(userState, { isAdmin: true });
+
+// 👇 Providing a partial state updater.
+patchState(userState, (state) => ({
+  user: { ...state.user, firstName: 'Jimi' },
+}));
+
+// 👇 Providing a sequence of partial state objects and/or updaters.
+patchState(
+  userState,
+  { isAdmin: false },
+  (state) => ({ user: { ...state.user, lastName: 'Hendrix' } })
+);
+```
+
+<div class="alert is-critical">
+
+Updaters passed to the `patchState` function must perform state updates in an immutable manner.
+
+</div>
+
+### Custom State Updaters
+
+Instead of providing partial states or updaters directly to the `patchState` function, it's possible to create custom state updaters.
+
+```ts
+import { PartialStateUpdater } from '@ngrx/signals';
+
+function setFirstName(firstName: string): PartialStateUpdater<{ user: User }> {
+  return (state) => ({ user: { ...state.user, firstName } });
+}
+
+const setAdmin = () => ({ isAdmin: true });
+```
+
+Custom state updaters are easy to test and can be reused across different parts of the application.
+
+```ts
+// Before:
+patchState(userState, (state) => ({
+  user: { ...state.user, firstName: 'Stevie' },
+  isAdmin: true,
+}));
+
+// After:
+patchState(userState, setFirstName('Stevie'), setAdmin());
+```
+
+## Usage
+
+### Example 1: SignalState in a Component
+
+<code-example header="counter.ts" linenums="true">
+
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { signalState, patchState } from '@ngrx/signals';
+
+@Component({
+  selector: 'ngrx-counter',
+  template: `
+    &lt;p&gt;Count: {{ state.count() }}&lt;/p&gt;
+
+    &lt;button (click)="increment()"&gt;Increment&lt;/button&gt;
+    &lt;button (click)="decrement()"&gt;Decrement&lt;/button&gt;
+    &lt;button (click)="reset()"&gt;Reset&lt;/button&gt;
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class Counter {
+  readonly state = signalState({ count: 0 });
+
+  increment(): void {
+    patchState(this.state, (state) => ({ count: state.count + 1 }));
+  }
+
+  decrement(): void {
+    patchState(this.state, (state) => ({ count: state.count - 1 }));
+  }
+
+  reset(): void {
+    patchState(this.state, { count: 0 });
+  }
+}
+
+</code-example>
+
+
+### Example 2: SignalState in a Service
+
+<code-tabs linenums="true">
+<code-pane header="book-list-store.ts">
+
+import { inject, Injectable } from '@angular/core';
+import { exhaustMap, pipe, tap } from 'rxjs';
+import { signalState, patchState } from '@ngrx/signals';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tapResponse } from '@ngrx/operators';
+import { BooksService } from './books-service';
+import { Book } from './book';
+
+type BookListState = { books: Book[]; isLoading: boolean };
+
+const initialState: BookListState = {
+  books: [],
+  isLoading: false,
+};
+
+@Injectable()
+export class BookListStore {
+  readonly #booksService = inject(BooksService);
+  readonly #state = signalState(initialState);
+
+  readonly books = this.#state.books;
+  readonly isLoading = this.#state.isLoading;
+
+  readonly loadBooks = rxMethod&lt;void&gt;(
+    pipe(
+      tap(() => patchState(this.#state, { isLoading: true })),
+      exhaustMap(() => {
+        return this.#booksService.getAll().pipe(
+          tapResponse({
+            next: (books) => patchState(this.#state, { books }),
+            error: console.error,
+            finalize: () => patchState(this.#state, { isLoading: false }),
+          })
+        );
+      })
+    )
+  );
+}
+
+</code-pane>
+
+<code-pane header="book-list.ts">
+
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { BookListStore } from './book-list-store';
+
+@Component({
+  selector: 'ngrx-book-list',
+  template: `
+    &lth1&gt;Books&lt;/h1&gt;
+  
+    @if (store.isLoading()) {
+      &lt;p&gt;Loading...&lt;/p&gt;
+    } @else {
+      &lt;ul&gt;
+        @for (book of store.books(); track book.id) {
+          &lt;li&gt;{{ book.title }}&lt;/li&gt;
+        }
+      &lt;/ul&gt;
+    }
+  `,
+  providers: [BookListStore],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class BookList {
+  readonly store = inject(BookListStore);
+
+  constructor() {
+    this.store.loadBooks();
+  }
+}
+
+</code-pane>
+</code-tabs>
+# DeepComputed
+
+The `deepComputed` function creates a `DeepSignal` when a computation result is an object literal.
+It can be used as a regular computed signal, but it also contains computed signals for each nested property.
+
+```ts
+import { signal } from '@angular/core';
+import { deepComputed } from '@ngrx/signals';
+
+const limit = signal(25);
+const offset = signal(0);
+const totalItems = signal(100);
+
+const pagination = deepComputed(() => ({
+  currentPage: Math.floor(offset() / limit()) + 1,
+  pageSize: limit(),
+  totalPages: Math.ceil(totalItems() / limit()),
+}));
+
+console.log(pagination()); // logs: { currentPage: 1, pageSize: 25, totalPages: 4 }
+console.log(pagination.currentPage()); // logs: 1
+console.log(pagination.pageSize()); // logs: 25
+console.log(pagination.totalPages()); // logs: 4
+```
+
+<div class="alert is-helpful">
+
+For enhanced performance, deeply nested signals are generated lazily and initialized only upon first access.
+
+</div>
+# SignalMethod
+
+`signalMethod` is a standalone factory function used for managing side effects with Angular signals. It accepts a callback and returns a processor function that can handle either a static value or a signal. The input type can be specified using a generic type argument:
+
+```ts
+import { Component } from '@angular/core';
+import { signalMethod } from '@ngrx/signals';
+
+@Component({ /* ... */ })
+export class Numbers {
+  // 👇 This method will have an input argument
+  // of type `number | Signal<number>`.
+  readonly logDoubledNumber = signalMethod<number>((num) => {
+    const double = num * 2;
+    console.log(double);
+  });
+}
+```
+
+`logDoubledNumber` can be called with a static value of type `number`, or a Signal of type `number`:
+
+```ts
+@Component({ /* ... */ })
+export class Numbers {
+  readonly logDoubledNumber = signalMethod<number>((num) => {
+    const double = num * 2;
+    console.log(double);
+  });
+
+  constructor() {
+    this.logDoubledNumber(1);
+    // console output: 2
+
+    const num = signal(2);
+    this.logDoubledNumber(num);
+    // console output: 4
+    
+    setTimeout(() => num.set(3), 3_000);
+    // console output after 3 seconds: 6
+  }
+}
+```
+
+## Automatic Cleanup
+
+`signalMethod` uses an `effect` internally to track the Signal changes.
+By default, the `effect` runs in the injection context of the caller. In the example above, that is the `Numbers` component. That means, that the `effect` is automatically cleaned up when the component is destroyed.
+
+If the call happens outside an injection context, then the injector of the `signalMethod` is used. This would be the case, if `logDoubledNumber` runs in `ngOnInit`:
+
+```ts
+@Component({ /* ... */ })
+export class Numbers implements OnInit {
+  readonly logDoubledNumber = signalMethod<number>((num) => {
+    const double = num * 2;
+    console.log(double);
+  });
+
+  ngOnInit(): void {
+    const value = signal(2);
+    // 👇 Uses the injection context of the `Numbers` component.
+    this.logDoubledNumber(value);
+  }
+}
+```
+
+Even though `logDoubledNumber` is called outside an injection context, automatic cleanup occurs when the `Numbers` component is destroyed, since `logDoubledNumber` was created within the component's injection context.
+
+However, when creating a `signalMethod` in an ancestor injection context, the cleanup behavior is different:
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class NumbersService {
+  readonly logDoubledNumber = signalMethod<number>((num) => {
+    const double = num * 2;
+    console.log(double);
+  });
+}
+
+@Component({ /* ... */ })
+export class Numbers implements OnInit {
+  readonly numbersService = inject(NumbersService);
+
+  ngOnInit(): void {
+    const value = signal(2);
+    // 👇 Uses the injection context of the `NumbersService`, which is root.
+    this.numbersService.logDoubledNumber(value);
+  }
+}
+```
+
+Here, the `effect` used internally by `signalMethod` outlives the component, which would produce a memory leak.
+
+<div class="alert is-important">
+
+If an injector is not provided when a method generated by `signalMethod` is called with a signal outside the injection context, a warning message about a potential memory leak is displayed in development mode.
+
+</div>
+
+## Manual Cleanup
+
+When a `signalMethod` is created in an ancestor injection context, it's necessary to explicitly provide the caller injector to ensure proper cleanup:
+
+```ts
+@Component({ /* ... */ })
+export class Numbers implements OnInit {
+  readonly numbersService = inject(NumbersService);
+  readonly injector = inject(Injector);
+
+  ngOnInit(): void {
+    const value = signal(1);
+    // 👇 Providing the `Numbers` component injector
+    // to ensure cleanup on component destroy.
+    this.numbersService.logDoubledNumber(value, {
+      injector: this.injector,
+    });
+  
+    // 👇 No need to provide an injector for static values.
+    this.numbersService.logDoubledNumber(2);
+  }
+}
+```
+
+## Initialization Outside of Injection Context
+
+The `signalMethod` must be initialized within an injection context. To initialize it outside an injection context, it's necessary to provide an injector as the second argument:
+
+```ts
+@Component({ /* ... */ })
+export class Numbers implements OnInit {
+  readonly injector = inject(Injector);
+
+  ngOnInit(): void {
+    const logDoubledNumber = signalMethod<number>(
+      (num) => console.log(num * 2),
+      { injector: this.injector },
+    );
+  }
+}
+```
+
+## Advantages over Effect
+
+At first sight, `signalMethod`, might be the same as `effect`:
+
+```ts
+@Component({ /* ... */ })
+export class Numbers {
+  readonly num = signal(2);
+  readonly logDoubledNumberEffect = effect(() => {
+    console.log(this.num() * 2);
+  });
+  readonly logDoubledNumber = signalMethod<number>((num) => {
+    console.log(num * 2);
+  });
+
+  constructor() {
+    this.logDoubledNumber(this.num);
+  }
+}
+```
+
+However, `signalMethod` offers three distinctive advantages over `effect`:
+
+- **Flexible Input**: The input argument can be a static value, not just a signal. Additionally, the processor function can be called multiple times with different inputs.
+- **No Injection Context Required**: Unlike an `effect`, which requires an injection context or an Injector, `signalMethod`'s "processor function" can be called without an injection context.
+- **Explicit Tracking**: Only the Signal of the parameter is tracked, while Signals within the "processor function" stay untracked.
+
+## `signalMethod` compared to `rxMethod`
+
+`signalMethod` is `rxMethod` without RxJS, and is therefore much smaller in terms of bundle size.
+
+Be aware that RxJS is superior to Signals in managing race conditions. Signals have a glitch-free effect, meaning that for multiple synchronous changes, only the last change is propagated. Additionally, they lack powerful operators like `switchMap` or `concatMap`.
+# RxJS Integration
+
+RxJS is still a major part of NgRx and the Angular ecosystem, and the `@ngrx/signals` package provides **opt-in** integration with RxJS APIs through the `rxjs-interop` plugin.
+
+## RxMethod
+
+The `rxMethod` is a standalone factory function designed for managing side effects by utilizing RxJS APIs.
+It takes a chain of RxJS operators as input and returns a reactive method.
+The reactive method can accept a static value, signal, or observable as an input argument.
+Input can be typed by providing a generic argument to the `rxMethod` function.
+
+```ts
+import { Component } from '@angular/core';
+import { map, pipe, tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+
+@Component({ /* ... */ })
+export class Numbers {
+  // 👇 This reactive method will have an input argument
+  // of type `number | Signal<number> | Observable<number>`.
+  readonly logDoubledNumber = rxMethod<number>(
+    // 👇 RxJS operators are chained together using the `pipe` function.
+    pipe(
+      map((num) => num * 2),
+      tap(console.log)
+    )
+  );
+}
+```
+
+Each invocation of the reactive method pushes the input value through the reactive chain.
+When called with a static value, the reactive chain executes once.
+
+```ts
+import { Component } from '@angular/core';
+import { map, pipe, tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+
+@Component({ /* ... */ })
+export class Numbers {
+  readonly logDoubledNumber = rxMethod<number>(
+    pipe(
+      map((num) => num * 2),
+      tap(console.log)
+    )
+  );
+
+  constructor() {
+    this.logDoubledNumber(1);
+    // console output: 2
+
+    this.logDoubledNumber(2);
+    // console output: 4
+  }
+}
+```
+
+When a reactive method is called with a signal, the reactive chain is executed every time the signal value changes.
+
+```ts
+import { Component, signal } from '@angular/core';
+import { map, pipe, tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+
+@Component({ /* ... */ })
+export class Numbers {
+  readonly logDoubledNumber = rxMethod<number>(
+    pipe(
+      map((num) => num * 2),
+      tap(console.log)
+    )
+  );
+
+  constructor() {
+    const num = signal(10);
+    this.logDoubledNumber(num);
+    // console output: 20
+
+    num.set(20);
+    // console output: 40
+  }
+}
+```
+
+When a reactive method is called with an observable, the reactive chain is executed every time the observable emits a new value.
+
+```ts
+import { Component } from '@angular/core';
+import { interval, map, of, pipe, tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+
+@Component({ /* ... */ })
+export class Numbers {
+  readonly logDoubledNumber = rxMethod<number>(
+    pipe(
+      map((num) => num * 2),
+      tap(console.log)
+    )
+  );
+
+  constructor() {
+    const num1$ = of(100, 200, 300);
+    this.logDoubledNumber(num1$);
+    // console output: 200, 400, 600
+
+    const num2$ = interval(2_000);
+    this.logDoubledNumber(num2$);
+    // console output: 0, 2, 4, 6, 8, 10, ... (every 2 seconds)
+  }
+}
+```
+
+By default, the `rxMethod` needs to be executed within an injection context.
+It's tied to its lifecycle and is automatically cleaned up when the injector is destroyed.
+
+### Handling API Calls
+
+The `rxMethod` is a great choice for handling API calls in a reactive manner.
+The subsequent example demonstrates how to use `rxMethod` to fetch the book by id whenever the `selectedBookId` signal value changes.
+
+```ts
+import { Component, inject, signal } from '@angular/core';
+import { concatMap, filter, pipe } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tapResponse } from '@ngrx/operators';
+import { BooksService } from './books-service';
+import { Book } from './book';
+
+@Component({ /* ... */ })
+export class BookList {
+  readonly #booksService = inject(BooksService);
+
+  readonly bookMap = signal<Record<string, Book>>({});
+  readonly selectedBookId = signal<string | null>(null);
+
+  readonly loadBookById = rxMethod<string | null>(
+    pipe(
+      filter((id) => !!id && !this.bookMap()[id]),
+      concatMap((id) => {
+        return this.#booksService.getById(id).pipe(
+          tapResponse({
+            next: (book) => this.addBook(book),
+            error: console.error,
+          })
+        );
+      })
+    )
+  );
+
+  constructor() {
+    // 👇 Load book by id whenever the `selectedBookId` value changes.
+    this.loadBookById(this.selectedBookId);
+  }
+
+  addBook(book: Book): void {
+    this.bookMap.update((bookMap) => ({ ...bookMap, [book.id]: book }));
+  }
+}
+```
+
+<div class="alert is-important">
+
+For safe handling of API responses, it is recommended to use the `tapResponse` operator from the `@ngrx/operators` package.
+Learn more about it in the [tapResponse](guide/operators/operators#tapresponse) guide.
+
+</div>
+
+The `rxMethod` function can also be utilized to define reactive methods for SignalStore.
+Further details can be found in the [Reactive Store Methods](guide/signals/signal-store#reactive-store-methods) guide.
+
+### Reactive Methods without Arguments
+
+To create a reactive method without arguments, the `void` type should be specified as a generic argument to the `rxMethod` function.
+
+```ts
+import { Component, inject, signal } from '@angular/core';
+import { exhaustMap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tapResponse } from '@ngrx/operators';
+import { BooksService } from './books-service';
+import { Book } from './book';
+
+@Component({ /* ... */ })
+export class BookList {
+  readonly #booksService = inject(BooksService);
+  readonly books = signal<Book[]>([]);
+
+  // 👇 Creating a reactive method without arguments.
+  readonly loadAllBooks = rxMethod<void>(
+    exhaustMap(() => {
+      return this.#booksService.getAll().pipe(
+        tapResponse({
+          next: (books) => this.books.set(books),
+          error: console.error,
+        })
+      );
+    })
+  );
+
+  constructor() {
+    this.loadAllBooks();
+  }
+}
+```
+
+### Reactive Methods and Injector Hierarchies
+
+The cleanup behavior of reactive methods differs when they're created and called across different injector hierarchies.
+
+If the reactive method is called within the descendant injection context, the call will be automatically cleaned up when the descendant injector is destroyed.
+However, when the call is made outside of the descendant injection context, it's necessary to explicitly provide the descendant injector reference to ensure proper cleanup. Otherwise, the cleanup occurs when the ascendant injector where the reactive method is initialized gets destroyed.
+
+```ts
+import { Component, inject, Injectable, Injector, OnInit } from '@angular/core';
+import { tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+
+@Injectable({ providedIn: 'root' })
+export class NumbersService {
+  readonly log = rxMethod<number>(tap(console.log));
+}
+
+@Component({ /* ... */ })
+export class Numbers implements OnInit {
+  readonly #injector = inject(Injector);
+  readonly #numbersService = inject(NumbersService);
+
+  constructor() {
+    const num1$ = interval(1_000);
+    // 👇 Automatic cleanup when component is destroyed.
+    this.#numbersService.log(num1$);
+  }
+
+  ngOnInit(): void {
+    const num2$ = interval(2_000);
+    // 👇 Requires injector for cleanup when component is destroyed.
+    this.#numbersService.log(num2$, { injector: this.#injector });
+  }
+}
+```
+
+<div class="alert is-important">
+
+If the injector is not provided when calling the reactive method with a signal or observable outside the injection context, a warning message about a potential memory leak is displayed in development mode.
+
+</div>
+
+### Manual Cleanup
+
+If a reactive method needs to be cleaned up before the injector is destroyed, manual cleanup can be performed by calling the `destroy` method.
+
+```ts
+import { Component } from '@angular/core';
+import { interval, tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+
+@Component({ /* ... */ })
+export class Numbers {
+  readonly logNumber = rxMethod<number>(tap(console.log));
+
+  constructor() {
+    const num1$ = interval(500);
+    const num2$ = interval(1_000);
+
+    this.logNumber(num1$);
+    this.logNumber(num2$);
+
+    setTimeout(() => {
+      // 👇 Destroy the reactive method after 3 seconds.
+      this.logNumber.destroy();
+    }, 3_000);
+  }
+}
+```
+
+When invoked, the reactive method returns the object with the `destroy` method.
+This allows manual cleanup of a specific call, preserving the activity of other reactive method calls until the corresponding injector is destroyed.
+
+```ts
+import { Component } from '@angular/core';
+import { interval, tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+
+@Component({ /* ... */ })
+export class Numbers {
+  readonly logNumber = rxMethod<number>(tap(console.log));
+
+  constructor() {
+    const num1$ = interval(500);
+    const num2$ = interval(1_000);
+
+    const num1Ref = this.logNumber(num1$);
+    const num2Ref = this.logNumber(num2$);
+
+    setTimeout(() => {
+      // 👇 Destroy the first reactive method call after 2 seconds.
+      num1Ref.destroy();
+    }, 2_000);
+  }
+}
+```
+
+### Initialization Outside of Injection Context
+
+Initialization of the reactive method outside an injection context is possible by providing an injector as the second argument to the `rxMethod` function.
+
+```ts
+import { Component, inject, Injector, OnInit } from '@angular/core';
+import { tap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+
+@Component({ /* ... */ })
+export class Numbers implements OnInit {
+  readonly #injector = inject(Injector);
+
+  ngOnInit(): void {
+    const logNumber = rxMethod<number>(
+      tap(console.log),
+      { injector: this.#injector }
+    );
+
+    logNumber(10);
+  }
+}
+```
+# Frequently Asked Questions
+
+<details>
+  <summary><b>#1</b> How to connect my SignalStore(s) with Redux DevTools?</summary>
+
+    There's no official connection between `@ngrx/signals` and the Redux Devtools.
+    We expect the Angular Devtools will provide support for signals soon, which can be used to track the state.
+    However, you could create a feature for this, or you can make use of the [`withDevtools` feature](https://github.com/angular-architects/ngrx-toolkit?tab=readme-ov-file#devtools-withdevtools) from the `@angular-architects/ngrx-toolkit` package.
+</details>
+
+<details>
+  <summary><b>#2</b> Can I use the Flux/Redux pattern with SignalStore?</summary>
+
+    Yes. Starting from NgRx version 19.2, the Events plugin introduces support for a Flux-style state management with SignalStore.
+    It enables defining and dispatching events, handling them through reducers and effects, and maintaining a unidirectional data flow similar to the traditional Redux pattern.
+    For more information, see the Events Plugin documentation.
+</details>
+
+<details>
+  <summary><b>#3</b> Can I define my SignalStore as a class?</summary>
+
+    Yes, it is possible to define a SignalStore using a class-based approach.
+    However, the NgRx team recommends using the functional style for defining SignalStores.
+
+    To define a class-based SignalStore, create a new class and extend from `signalStore`.
+
+```ts
+@Injectable()
+export class CounterStore extends signalStore(
+  { protectedState: false },
+  withState({ count: 0 })
+) {
+  readonly doubleCount = computed(() => this.count() * 2);
+
+  increment(): void {
+    patchState(this, { count: this.count() + 1 });
+  }
+}
+```
+</details>
+
+<details>
+  <summary><b>#4</b> How can I get the type of a SignalStore?</summary>
+
+    To get the type of a SignalStore, use the `InstanceType` utility type.
+
+```ts
+const CounterStore = signalStore(withState({ count: 0 }));
+
+type CounterStore = InstanceType<typeof CounterStore>;
+
+function logCount(store: CounterStore): void {
+  console.log(store.count());
+}
+```
+</details>
+
+<details>
+  <summary><b>#5</b> Can I inject a SignalStore via the constructor?</summary>
+
+    Yes. To inject a SignalStore via the constructor, define and export its type with the same name.
+
+```ts
+// counter-store.ts
+export const CounterStore = signalStore(withState({ count: 0 }));
+
+export type CounterStore = InstanceType<typeof CounterStore>;
+
+// counter.ts
+import { CounterStore } from './counter.store';
+
+@Component({ /* ... */ })
+export class Counter {
+  constructor(readonly store: CounterStore) {}
+}
+```
+</details>
+
+<details>
+  <summary><b>#6</b> Can features like `withComputed` or `withMethods` reference other members inside the same feature?</summary>
+
+It may be necessary for a computed in a `withComputed` feature to need to reference another computed value, 
+or a method in a `withMethods` feature to refer to another method. To do so, you can break out the common piece 
+with a helper that can serve as a function or computed itself. 
+
+Although it is possible to have multiple features that reference each other, we recommend having everything in one call. 
+That adheres more to JavaScript's functional style and keeps features co-located.
+
+```ts
+export const BooksStore = signalStore(
+  withState(initialState),
+  withComputed(({ filter }) => {
+    // 👇 Define helper functions (or computed signals).
+    const sortDirection = computed(() => (filter.order() === 'asc' ? 1 : -1));
+
+    return {
+      sortDirection,
+      sortDirectionReversed: () => sortDirection() * -1,
+    };
+  })
+);
+```
+</details>

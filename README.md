@@ -4,6 +4,9 @@
 
 ![Word Wonder Banner](public/app-screenshot-1.png)
 
+[![Watch the Demo](https://img.youtube.com/vi/sEIegw9tfAs/0.jpg)](https://www.youtube.com/watch?v=sEIegw9tfAs)
+
+
 ## ✨ Key Features
 
 - **📖 Interactive Reading:**

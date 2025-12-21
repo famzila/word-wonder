@@ -1,0 +1,53 @@
+💾 Lucide Angular Setup Guide for Angular Standalone Apps (pnpm)
+
+Lucide Angular
+Angular components and services for Lucide icons that integrate with Angular's dependency injection and component system. Provides both traditional module-based and modern standalone component approaches for maximum flexibility in Angular applications.
+
+What you can accomplish:
+
+Use icons as Angular components with full dependency injection support
+Configure icons globally through Angular services and providers
+Choose from multiple component selectors (lucide-angular, lucide-icon, i-lucide, span-lucide)
+Integrate with Angular's reactive forms and data binding
+Build scalable applications with tree-shaken icon bundles and lazy loading support
+
+Installation
+pnpm add lucide-angular
+
+How to use
+Step 1: Import LucideAngularModule
+```typescript
+import { Component } from '@angular/core';
+import { LucideAngularModule, FileIcon } from 'lucide-angular';
+
+@Component({
+  selector: 'app-cmp',
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
+  imports: [LucideAngularModule]
+})
+export class CMP {
+  readonly FileIcon = FileIcon;
+}
+```
+
+Step 2: Use the icons in templates
+Within your templates you may now use one of the following component tags to insert an icon:
+
+```html
+<lucide-angular [img]="FileIcon" class="my-icon"></lucide-angular>
+<lucide-icon [img]="FileIcon" class="my-icon"></lucide-icon>
+<i-lucide [img]="FileIcon" class="my-icon"></i-lucide>
+<span-lucide [img]="FileIcon" class="my-icon"></span-lucide>
+```
+
+Props
+You can pass additional props to adjust the icon appearance.
+
+name	type	default
+size	number	24
+color	string	currentColor
+strokeWidth	number	2
+absoluteStrokeWidth	boolean	false
+
+<i-lucide name="house" [size]="48" color="red" [strokeWidth]="1"></i-lucide>
