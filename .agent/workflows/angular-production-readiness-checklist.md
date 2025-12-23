@@ -89,9 +89,9 @@ Proper order maintained in all TypeScript classes:
 
 ### 3.2 Dependencies
 - [ ] All dependencies up to date
-- [ ] No known security vulnerabilities (`npm audit` or `pnpm audit`)
+- [ ] No known security vulnerabilities (`npm audit` or `pnpm audit`), run the command and check.
 - [ ] Only trusted packages from verified sources
-- [ ] No deprecated packages
+- [ ] No deprecated packages, you can use Brave MCP to check it
 
 ### 3.3 API & Network
 - [ ] HTTPS enforced for all API calls
@@ -108,7 +108,7 @@ Proper order maintained in all TypeScript classes:
 - [ ] All AXE accessibility checks pass
 - [ ] Proper ARIA labels on interactive elements
 - [ ] `role` attributes used correctly
-- [ ] Semantic HTML elements used (`nav`, `main`, `article`, etc.)
+- [ ] Semantic HTML elements used (`nav`, `main`, `article`, etc.) properly
 - [ ] Form inputs have associated labels
 - [ ] Error messages properly associated with form fields
 
@@ -144,16 +144,16 @@ Proper order maintained in all TypeScript classes:
 
 ## 🎨 **5. UI/UX & DaisyUI SPECIFIC**
 
-### 5.1 DaisyUI Usage
-- [ ] Tailwind CSS 4 configured correctly
-- [ ] DaisyUI plugin added to CSS (`@plugin "daisyui";`)
+### 5.1 DaisyUI Usage if applicable
+- [ ] Tailwind CSS 4 is configured correctly if used
+- [ ] DaisyUI plugin added to CSS (`@plugin "daisyui";`) if used
 - [ ] Only existing daisyUI class names or Tailwind utilities used
-- [ ] No custom CSS written (using daisyUI/Tailwind classes)
+- [ ] No custom CSS written or hard-coded styles (using daisyUI/Tailwind classes)
 - [ ] Responsive design using Tailwind's responsive prefixes
 - [ ] Theme configuration properly set if using custom themes
 - [ ] Color contrast verified for all themes
 
-### 5.2 Icons (Lucide Angular)
+### 5.2 Icons (Lucide Angular) if applicable
 - [ ] Only used icons imported (not entire library)
 - [ ] Proper selector used (`<i-lucide>`, `<lucide-icon>`, etc.)
 - [ ] Accessible labels on icon-only buttons (`aria-label`)
@@ -171,7 +171,7 @@ Proper order maintained in all TypeScript classes:
 
 ## 🌍 **6. INTERNATIONALIZATION (i18n)**
 
-### 6.1 ngx-translate Configuration
+### 6.1 ngx-translate Configuration if applicable
 - [ ] `provideHttpClient()` included in app config
 - [ ] `provideTranslateService()` properly configured
 - [ ] Translation files organized and complete
@@ -223,8 +223,8 @@ Proper order maintained in all TypeScript classes:
 - [ ] `providedIn` set correctly (root or component level)
 - [ ] State protection appropriate (`protectedState` setting)
 - [ ] Initial state properly defined
-- [ ] Private members use `_` prefix
 - [ ] Lifecycle hooks defined at store level where needed
+- [ ] Component inject store not services. Services should be injected in store.
 
 ### 8.2 State Updates
 - [ ] `patchState` used for updates (not direct mutation)
@@ -245,7 +245,6 @@ Proper order maintained in all TypeScript classes:
 - [ ] Entity updaters used correctly
 - [ ] Custom ID selectors defined if needed
 - [ ] Named collections for multiple entity types
-- [ ] Private collections use `_` prefix
 
 ---
 
@@ -253,7 +252,6 @@ Proper order maintained in all TypeScript classes:
 
 ### 9.1 Build Configuration
 - [ ] Production build tested (`ng build --configuration production`)
-- [ ] AOT compilation enabled
 - [ ] Source maps disabled in production
 - [ ] Build optimization enabled
 - [ ] Environment-specific configurations set
@@ -287,7 +285,7 @@ Proper order maintained in all TypeScript classes:
 
 ### 10.2 Development Practices
 - [ ] Consistent code formatting (Prettier/ESLint)
-- [ ] Git commit messages follow convention
+- [ ] Git commit messages follow commitlint convention
 - [ ] No commented-out code
 - [ ] No console.log in production code
 - [ ] TODO comments tracked
@@ -300,13 +298,10 @@ Proper order maintained in all TypeScript classes:
 - [ ] Analytics/monitoring tools integrated
 - [ ] SEO meta tags configured
 - [ ] Favicon and app icons set
-- [ ] robots.txt configured
-- [ ] sitemap.xml generated
 - [ ] Browser compatibility tested (Chrome, Firefox, Safari, Edge)
 - [ ] Mobile device testing completed
 - [ ] Performance profiling completed
 - [ ] Security audit completed
-- [ ] Stakeholder sign-off obtained
 
 ---
 
@@ -338,4 +333,4 @@ Proper order maintained in all TypeScript classes:
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [Web Vitals](https://web.dev/vitals/)
 - [NgRx Signals Documentation](https://ngrx.io/guide/signals)
-- [DaisyUI Documentation](https://daisyui.com)
+- [DaisyUI Documentation](https://daisyui.com/llms.txt)
