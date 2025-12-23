@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -34,7 +34,8 @@ import { TranslatePipe } from '@ngx-translate/core';
     :host {
       display: block;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeader {
   // Inputs

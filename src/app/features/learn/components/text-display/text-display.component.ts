@@ -2,7 +2,7 @@ import { Component, input, output, computed, ChangeDetectionStrategy } from '@an
 
 @Component({
   selector: 'app-text-display',
-  imports: [],
+
   templateUrl: './text-display.html',
   styleUrl: './text-display.css',
   changeDetection: ChangeDetectionStrategy.OnPush

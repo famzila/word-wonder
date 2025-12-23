@@ -1,4 +1,4 @@
-import { Component, output } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule, Upload, Camera } from 'lucide-angular';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -45,7 +45,7 @@ import { TranslatePipe } from '@ngx-translate/core';
       </div>
     </div>
   `,
-  styles: []
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UploadCard {
   onUpload = output<File>();

@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule, House, BookOpen, Star, Settings } from 'lucide-angular';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-bottom-nav',
-  imports: [RouterLink, RouterLinkActive, LucideAngularModule, TranslateModule],
+  imports: [RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe],
   template: `
     <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg shadow-2xl z-50 border-t border-white/20" aria-label="Main navigation">
       <ul class="flex flex-row justify-around items-center h-24 px-4 py-4 list-none m-0">
@@ -48,7 +48,8 @@ import { TranslateModule } from '@ngx-translate/core';
   styles: [`
     :host { display: block; }
     /* Override DaisyUI btm-nav default interactions if needed, but Tailwind classes above handle most */
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BottomNav {
   readonly HouseIcon = House;

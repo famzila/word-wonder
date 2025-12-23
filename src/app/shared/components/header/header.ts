@@ -1,4 +1,4 @@
-import { Component, input, output, inject } from '@angular/core';
+import { Component, input, output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Location } from '@angular/common';
 import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
 
@@ -35,7 +35,8 @@ import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Header {
   title = input.required<string>();

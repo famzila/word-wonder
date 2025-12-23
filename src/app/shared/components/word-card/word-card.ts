@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule, Play, Trash2, Volume2 } from 'lucide-angular';
 import { Word } from '../../models/word.model';
 
@@ -45,7 +45,7 @@ import { Word } from '../../models/word.model';
       </div>
     </div>
   `,
-  styles: []
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WordCard {
   word = input.required<Word>();

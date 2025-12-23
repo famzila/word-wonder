@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, RoutesRecognized } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { Header } from '../../../shared/components/header/header';
@@ -15,7 +15,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
       </div>
     </div>
   `,
-  styles: []
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FocusLayout {
   private router = inject(Router);

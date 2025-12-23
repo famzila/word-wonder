@@ -1,4 +1,4 @@
-import { Component, inject, effect } from '@angular/core';
+import { Component, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { LucideAngularModule, Sparkles } from 'lucide-angular';
 import { UploadCard } from './components/upload-card/upload-card';
@@ -55,7 +55,8 @@ import { Router } from '@angular/router';
       display: block;
       padding-bottom: 7rem; /* Space for Bottom Nav */
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Home {
   // Injections

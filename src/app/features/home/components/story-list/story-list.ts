@@ -1,11 +1,11 @@
-import { Component, output, input } from '@angular/core';
+import { Component, output, input, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule, BookOpen } from 'lucide-angular';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Story } from '../../../../shared/models/word.model';
 
 @Component({
   selector: 'app-story-list',
-  imports: [LucideAngularModule, TranslateModule],
+  imports: [LucideAngularModule, TranslatePipe],
   template: `
     <div class="w-full space-y-4">
       
@@ -34,7 +34,7 @@ import { Story } from '../../../../shared/models/word.model';
 
     </div>
   `,
-  styles: []
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StoryList {
   // Inputs/Outputs

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './core/layout/main-layout/main-layout';
-import { FocusLayout } from './core/layout/focus-layout/focus-layout';
+
 
 export const routes: Routes = [
   {
@@ -35,18 +35,7 @@ export const routes: Routes = [
       }
     ]
   },
-  // Focus Layout Routes (Header with Back)
-  {
-    path: '',
-    component: FocusLayout,
-    children: [
-      {
-        path: 'edit-text',
-        loadComponent: () => import('./features/edit-text/edit-text').then(m => m.EditText),
-        data: { title: 'Edit Your Text' }
-      }
-    ]
-  },
+
   {
     path: '**',
     redirectTo: 'home'

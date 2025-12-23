@@ -1,4 +1,4 @@
-import { Component, input, output, effect, signal } from '@angular/core';
+import { Component, input, output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LucideAngularModule, Sparkles } from 'lucide-angular';
 
@@ -40,7 +40,7 @@ import { LucideAngularModule, Sparkles } from 'lucide-angular';
       </div>
     </div>
   `,
-  styles: []
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditText {
   text = input.required<string>();

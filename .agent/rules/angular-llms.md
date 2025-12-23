@@ -174,5 +174,12 @@ export class CharacterViewer {
 6. lifecycle hooks by lifecycle order (in case of components)
 7. methods (public first, then private)
 
+### Pay attention to the following:
+- Remove CSS empty files if not used.
+- Remove styles array if it's empty in components.
+- Remove imports array if it's empty in components.
+- Make sure templates html files are used if component used inline html then no need to keep its html file.
+- If ngx-translate is used in the project, make sure we import only needed dependencies such as TranslatePipe instead of importing whole TranslateModule for tree sharking.
+
 ### MCP Tools
 - Use Angular CLI MCP tools to fetch documentation and any other tool you need from it to accomplish the task.

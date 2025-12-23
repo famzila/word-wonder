@@ -83,3 +83,4 @@ Performance,DO implement Lazy Loading for feature modules using TranslateModule.
 Translation Keys,"DO use clear, namespaced, and descriptive keys (e.g., DASHBOARD.GREETING.TITLE).","DON'T use long, sentence-like keys or overly vague names (e.g., translation_key_1)."
 Missing Keys,"DO define a custom MissingTranslationHandler (e.g., a development one that logs errors) to catch missing keys early.","DON'T rely on the default behavior (which just displays the key itself) in production, as it looks unprofessional."
 Content,DO use the Pipe (`,translate`) for interpolations and template-based translation as it's the most flexible.
+Do not import whole TranslateModule in any component. Import only what the component needs TranslatePipe for example.

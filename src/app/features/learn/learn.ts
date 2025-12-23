@@ -31,7 +31,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   ],
   providers: [LearnStore],
   templateUrl: './learn.html',
-  styleUrl: './learn.css',
+
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Learn implements OnDestroy {
