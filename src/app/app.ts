@@ -1,7 +1,9 @@
 import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { LucideAngularModule, House } from 'lucide-angular';
+import { TranslateService } from '@ngx-translate/core';
+import { House } from 'lucide-angular';
+
+import { SettingsStore } from './core/store/settings.store';
 
 @Component({
   selector: 'app-root',
@@ -10,13 +12,14 @@ import { LucideAngularModule, House } from 'lucide-angular';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  private translate = inject(TranslateService);
+  private readonly translate = inject(TranslateService);
+  private readonly settingsStore = inject(SettingsStore);
   protected readonly title = signal('word-wonder');
   protected readonly HouseIcon = House;
 
   constructor() {
-    this.translate.addLangs(['en']);
+    this.translate.addLangs(['en', 'ar', 'fr']);
     this.translate.setFallbackLang('en');
-    this.translate.use('en');
+    this.translate.use(this.settingsStore.language());
   }
 }
