@@ -16,6 +16,7 @@
     "listen": "Listen",
     "save": "Save",
     "remove": "Remove",
+    "close": "Close",
     "word": "word",
     "nav": {
       "home": "Home",
@@ -34,7 +35,9 @@
     "subtitle": "Words you're learning to master!",
     "saved_suffix": "words saved",
     "empty_title": "No words yet!",
-    "empty_desc": "Go to a story and click on any word to save it here."
+    "empty_desc": "Go to a story and click on any word to save it here.",
+    "play_pronunciation": "Play pronunciation",
+    "remove_favorite": "Remove from favorites"
   },
   "settings": {
     "title": "Settings",
@@ -43,13 +46,27 @@
   },
   "word_modal": {
     "syllables": "Syllables:",
-    "meaning_label": "What does it mean?"
+    "meaning_label": "What does it mean?",
+    "illustration_alt": "Illustration for {{word}}"
   },
   "learn": {
     "mode_listen": "Listen & Learn",
     "mode_practice": "Practice Time",
     "tab_listen": "Listen",
-    "tab_practice": "Practice"
+    "tab_practice": "Practice",
+    "controls": {
+      "speed": "Speed",
+      "slow": "Slow",
+      "fast": "Fast",
+      "position": "Position",
+      "start": "Start",
+      "end": "End",
+      "reset": "Reset",
+      "play": "Play",
+      "pause": "Pause",
+      "speed_label": "Playback speed control",
+      "position_label": "Word position in text"
+    }
   },
   "stories": {
     "star": {

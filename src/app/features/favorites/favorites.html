@@ -35,15 +35,17 @@
                 <!-- Right: Actions -->
                  <div class="flex flex-col gap-3">
                     <button 
+                    <button 
                         (click)="play(word)"
-                        aria-label="Play pronunciation"
+                        [attr.aria-label]="'favorites.play_pronunciation' | translate"
                         class="btn btn-circle btn-secondary">
                             <lucide-angular [img]="VolumeIcon" class="w-5 h-5 fill-current"></lucide-angular>
                     </button>
                     
                     <button 
+                    <button 
                         (click)="delete(word.id)" 
-                        aria-label="Remove from favorites"
+                        [attr.aria-label]="'favorites.remove_favorite' | translate"
                         class="btn btn-circle btn-outline btn-error">
                             <lucide-angular [img]="TrashIcon" class="w-5 h-5"></lucide-angular>
                     </button>

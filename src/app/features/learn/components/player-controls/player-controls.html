@@ -3,15 +3,15 @@
   <!-- Speed Control -->
   <div class="space-y-2">
     <div class="flex justify-between text-sm font-bold text-neutral/70">
-      <span>Speed: {{ playbackSpeed() }}x</span>
+      <span>{{ 'learn.controls.speed' | translate }}: {{ playbackSpeed() }}x</span>
     </div>
     <div class="flex items-center gap-4">
-      <span class="text-xs font-bold text-neutral/50">Slow</span>
+      <span class="text-xs font-bold text-neutral/50">{{ 'learn.controls.slow' | translate }}</span>
       <lucide-angular [img]="Turtle" class="w-4 h-4 text-success"></lucide-angular>
       
       <input 
         type="range"
-        aria-label="Playback speed control" 
+        [attr.aria-label]="'learn.controls.speed_label' | translate" 
         min="0.5" 
         max="1.5" 
         step="0.25" 
@@ -21,18 +21,18 @@
       />
       
       <lucide-angular [img]="Rabbit" class="w-4 h-4 text-primary"></lucide-angular>
-      <span class="text-xs font-bold text-neutral/50">Fast</span>
+      <span class="text-xs font-bold text-neutral/50">{{ 'learn.controls.fast' | translate }}</span>
     </div>
   </div>
 
   <!-- Position Slider -->
   <div class="space-y-2">
       <div class="flex justify-between text-sm font-bold text-neutral/70">
-        <span>Position: {{ currentWordIndex() + 1 }} / {{ totalWords() }}</span>
+        <span>{{ 'learn.controls.position' | translate }}: {{ currentWordIndex() + 1 }} / {{ totalWords() }}</span>
       </div>
       <input 
         type="range"
-        aria-label="Word position in text" 
+        [attr.aria-label]="'learn.controls.position_label' | translate" 
         [min]="0" 
         [max]="totalWords() - 1" 
         [value]="currentWordIndex()" 
@@ -40,8 +40,8 @@
         class="range range-xs range-secondary" 
       />
       <div class="flex justify-between text-xs font-bold text-neutral/50">
-        <span>Start</span>
-        <span>End</span>
+        <span>{{ 'learn.controls.start' | translate }}</span>
+        <span>{{ 'learn.controls.end' | translate }}</span>
       </div>
   </div>
 
@@ -52,7 +52,7 @@
       (click)="reset.emit()"
     >
       <lucide-angular [img]="RotateCcw" class="w-6 h-6"></lucide-angular>
-      Reset
+      {{ 'learn.controls.reset' | translate }}
     </button>
 
     <button 
@@ -61,10 +61,10 @@
     >
       @if (isPlaying()) {
         <lucide-angular [img]="Pause" class="w-6 h-6 fill-current"></lucide-angular>
-        Pause
+        {{ 'learn.controls.pause' | translate }}
       } @else {
         <lucide-angular [img]="Play" class="w-6 h-6 fill-current"></lucide-angular>
-        Play
+        {{ 'learn.controls.play' | translate }}
       }
     </button>
   </div>

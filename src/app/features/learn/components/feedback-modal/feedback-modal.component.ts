@@ -48,7 +48,7 @@ import { TranslatePipe } from '@ngx-translate/core';
         </div>
       </div>
       <form method="dialog" class="modal-backdrop">
-        <button (click)="close.emit()">close</button>
+        <button (click)="close.emit()">{{ 'common.close' | translate }}</button>
       </form>
     </dialog>
   `,

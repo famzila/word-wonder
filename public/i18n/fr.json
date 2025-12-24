@@ -16,6 +16,7 @@
     "listen": "Écouter",
     "save": "Enregistrer",
     "remove": "Supprimer",
+    "close": "Fermer",
     "word": "mot",
     "nav": {
       "home": "Accueil",
@@ -34,7 +35,9 @@
     "subtitle": "Les mots que tu apprends !",
     "saved_suffix": "mots enregistrés",
     "empty_title": "Pas encore de mots !",
-    "empty_desc": "Va dans une histoire et clique sur un mot pour l'enregistrer ici."
+    "empty_desc": "Va dans une histoire et clique sur un mot pour l'enregistrer ici.",
+    "play_pronunciation": "Écouter la prononciation",
+    "remove_favorite": "Retirer des favoris"
   },
   "settings": {
     "title": "Réglages",
@@ -42,14 +45,28 @@
     "language_desc": "Choisis ta langue préférée"
   },
   "word_modal": {
-    "syllables": "Syllabes :",
-    "meaning_label": "Qu'est-ce que ça veut dire ?"
+    "syllables": "Syllables :",
+    "meaning_label": "Qu'est-ce que ça veut dire ?",
+    "illustration_alt": "Illustration pour {{word}}"
   },
   "learn": {
     "mode_listen": "Écoute et apprends",
     "mode_practice": "Temps de pratique",
     "tab_listen": "Écouter",
-    "tab_practice": "Pratiquer"
+    "tab_practice": "Pratiquer",
+    "controls": {
+      "speed": "Vitesse",
+      "slow": "Lent",
+      "fast": "Rapide",
+      "position": "Position",
+      "start": "Début",
+      "end": "Fin",
+      "reset": "Réinitialiser",
+      "play": "Lire",
+      "pause": "Pause",
+      "speed_label": "Contrôle de vitesse de lecture",
+      "position_label": "Position du mot dans le texte"
+    }
   },
   "stories": {
     "star": {

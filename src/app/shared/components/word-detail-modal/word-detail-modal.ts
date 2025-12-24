@@ -17,7 +17,7 @@ import { TranslatePipe } from '@ngx-translate/core';
         
         <!-- Close Button -->
         <form method="dialog">
-          <button aria-label="Close modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          <button [attr.aria-label]="'common.close' | translate" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
             <lucide-angular [img]="XIcon" class="w-5 h-5"></lucide-angular>
           </button>
         </form>
@@ -34,11 +34,11 @@ import { TranslatePipe } from '@ngx-translate/core';
             @if (isLoading()) {
                <div class="skeleton h-48 w-full rounded-2xl"></div>
             } @else {
-               @if (imageUrl()) {
-                 <div class="relative w-full h-48 rounded-2xl overflow-hidden shadow-lg bg-base-200">
-                   <img [src]="imageUrl()" alt="Illustration for {{ word()?.original }}" class="w-full h-full object-contain">
-                 </div>
-               }
+                @if (imageUrl()) {
+                  <div class="relative w-full h-48 rounded-2xl overflow-hidden shadow-lg bg-base-200">
+                    <img [src]="imageUrl()" [alt]="'word_modal.illustration_alt' | translate: {word: word()?.original}" class="w-full h-full object-contain">
+                  </div>
+                }
             }
 
             <!-- AI Definition -->
@@ -92,7 +92,7 @@ import { TranslatePipe } from '@ngx-translate/core';
         </div>
       </div>
       <form method="dialog" class="modal-backdrop">
-        <button>close</button>
+        <button>{{ 'common.close' | translate }}</button>
       </form>
     </dialog>
   `,

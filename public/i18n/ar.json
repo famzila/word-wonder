@@ -16,6 +16,7 @@
     "listen": "استمع",
     "save": "حفظ",
     "remove": "إزالة",
+    "close": "إغلاق",
     "word": "كلمة",
     "nav": {
       "home": "الرئيسية",
@@ -34,7 +35,9 @@
     "subtitle": "الكلمات التي تتعلمها!",
     "saved_suffix": "كلمات محفوظة",
     "empty_title": "لا توجد كلمات بعد!",
-    "empty_desc": "اذهب إلى قصة واضغط على أي كلمة لحفظها هنا."
+    "empty_desc": "اذهب إلى قصة واضغط على أي كلمة لحفظها هنا.",
+    "play_pronunciation": "تشغيل النطق",
+    "remove_favorite": "إزالة من المفضلة"
   },
   "settings": {
     "title": "الإعدادات",
@@ -43,13 +46,27 @@
   },
   "word_modal": {
     "syllables": "المقاطع الصوتية:",
-    "meaning_label": "ماذا تعني؟"
+    "meaning_label": "ماذا تعني؟",
+    "illustration_alt": "توضيح لـ {{word}}"
   },
   "learn": {
     "mode_listen": "استمع وتعلم",
     "mode_practice": "وقت التدريب",
     "tab_listen": "استماع",
-    "tab_practice": "تدريب"
+    "tab_practice": "تدريب",
+    "controls": {
+      "speed": "السرعة",
+      "slow": "بطيء",
+      "fast": "سريع",
+      "position": "الموضع",
+      "start": "البداية",
+      "end": "النهاية",
+      "reset": "إعادة تعيين",
+      "play": "تشغيل",
+      "pause": "إيقاف مؤقت",
+      "speed_label": "التحكم في سرعة التشغيل",
+      "position_label": "موقع الكلمة في النص"
+    }
   },
   "stories": {
     "star": {
