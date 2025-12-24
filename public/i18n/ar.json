@@ -8,7 +8,8 @@
     "upload_card": {
       "title": "تحميل صورة",
       "upload_btn": "اضغط لتحميل صورة",
-      "camera_btn": "أو التقط صورة"
+      "camera_btn": "أو التقط صورة",
+      "analyzing": "جاري قراءة الصورة..."
     }
   },
   "common": {
@@ -66,7 +67,15 @@
       "pause": "إيقاف مؤقت",
       "speed_label": "التحكم في سرعة التشغيل",
       "position_label": "موقع الكلمة في النص"
-    }
+    },
+    "practice": {
+      "listening": "جاري الاستماع...",
+      "tap_to_record": "اضغط لبدء التسجيل",
+      "start_recording": "بدء التسجيل",
+      "stop_recording": "إيقاف التسجيل"
+    },
+    "tap_instruction": "اضغط على أي كلمة لمعرفة المزيد عنها!",
+    "aria_learn_more": "اعرف المزيد عن {{word}}"
   },
   "stories": {
     "star": {

@@ -1,8 +1,9 @@
 import { Component, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-text-display',
-
+  imports: [TranslatePipe],
   templateUrl: './text-display.html',
   styleUrl: './text-display.css',
   changeDetection: ChangeDetectionStrategy.OnPush

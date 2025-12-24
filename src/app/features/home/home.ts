@@ -36,6 +36,7 @@ import { Router } from '@angular/router';
         <!-- Upload Card -->
         <app-upload-card 
             class="w-full"
+            [isProcessing]="store.ocrStatus() === 'loading'"
             (onUpload)="handleUpload($event)"
             (onCamera)="handleCamera($event)">
         </app-upload-card>

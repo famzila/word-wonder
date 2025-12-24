@@ -8,7 +8,8 @@
     "upload_card": {
       "title": "Télécharger une image",
       "upload_btn": "Appuyez pour télécharger",
-      "camera_btn": "ou prenez une photo"
+      "camera_btn": "ou prenez une photo",
+      "analyzing": "Lecture de l'image..."
     }
   },
   "common": {
@@ -66,7 +67,15 @@
       "pause": "Pause",
       "speed_label": "Contrôle de vitesse de lecture",
       "position_label": "Position du mot dans le texte"
-    }
+    },
+    "practice": {
+      "listening": "Écoute...",
+      "tap_to_record": "Appuyez pour commencer l'enregistrement",
+      "start_recording": "Commencer l'enregistrement",
+      "stop_recording": "Arrêter l'enregistrement"
+    },
+    "tap_instruction": "Appuie sur un mot pour en savoir plus !",
+    "aria_learn_more": "En savoir plus sur {{word}}"
   },
   "stories": {
     "star": {

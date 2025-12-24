@@ -1,9 +1,10 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { LucideAngularModule, Mic, MicOff } from 'lucide-angular';
 
 @Component({
   selector: 'app-practice-controls',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="card bg-base-200 shadow-xl p-8 rounded-[2.5rem] flex flex-col items-center justify-center gap-6 min-h-[250px]">
@@ -17,7 +18,7 @@ import { LucideAngularModule, Mic, MicOff } from 'lucide-angular';
         [class.hover:scale-105]="!isRecording()"
         [class.shadow-primary/40]="!isRecording()"
         (click)="toggleRecording.emit()"
-        [attr.aria-label]="isRecording() ? 'Stop recording' : 'Start recording'"
+        [attr.aria-label]="(isRecording() ? 'learn.practice.stop_recording' : 'learn.practice.start_recording') | translate"
       >
         <!-- Subtle ring effect when recording -->
         @if (isRecording()) {
@@ -30,13 +31,13 @@ import { LucideAngularModule, Mic, MicOff } from 'lucide-angular';
 
       @if (isRecording()) {
         <p class="text-neutral/60 font-bold animate-pulse">
-          Listening...
+          {{ 'learn.practice.listening' | translate }}
         </p>
       }
       
       @if (!isRecording()) {
          <p class="text-neutral/40 font-bold">
-            Tap to start recording
+            {{ 'learn.practice.tap_to_record' | translate }}
          </p>
       }
 

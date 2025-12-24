@@ -8,7 +8,8 @@
     "upload_card": {
       "title": "Upload an Image",
       "upload_btn": "Tap to upload an image",
-      "camera_btn": "or take a photo"
+      "camera_btn": "or take a photo",
+      "analyzing": "Reading your image..."
     }
   },
   "common": {
@@ -66,7 +67,15 @@
       "pause": "Pause",
       "speed_label": "Playback speed control",
       "position_label": "Word position in text"
-    }
+    },
+    "practice": {
+      "listening": "Listening...",
+      "tap_to_record": "Tap to start recording",
+      "start_recording": "Start recording",
+      "stop_recording": "Stop recording"
+    },
+    "tap_instruction": "Tap any word to learn more about it!",
+    "aria_learn_more": "Learn more about {{word}}"
   },
   "stories": {
     "star": {
