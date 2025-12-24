@@ -48,7 +48,7 @@
   <!-- Main Actions -->
   <div class="flex gap-4">
     <button 
-      class="btn btn-outline btn-primary btn-lg flex-1"
+      class="btn btn-outline btn-primary btn-lg flex-1 gap-2 whitespace-nowrap"
       (click)="reset.emit()"
     >
       <lucide-angular [img]="RotateCcw" class="w-6 h-6"></lucide-angular>
@@ -56,7 +56,7 @@
     </button>
 
     <button 
-      class="btn btn-gradient-secondary flex-1 rounded-full"
+      class="btn btn-gradient-secondary flex-1 rounded-full gap-2 whitespace-nowrap"
       (click)="playToggle.emit()"
     >
       @if (isPlaying()) {

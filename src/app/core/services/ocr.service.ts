@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DEFAULT_LANGUAGE_CODE } from '../constants/app.constants';
 import { Observable, from, map, switchMap } from 'rxjs';
 import { GoogleGenAI } from '@google/genai';
 import { environment } from '../../../environments/environment';
@@ -74,7 +75,7 @@ export class OcrService {
       console.error('OCR Gemini Error:', error);
       return { 
         text: 'Could not extract text from image.', 
-        languageCode: 'en-US' 
+        languageCode: DEFAULT_LANGUAGE_CODE 
       };
     }
   }

@@ -1,6 +1,7 @@
-import { Component, input, output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, effect, signal, ChangeDetectionStrategy, computed } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LucideAngularModule, Sparkles } from 'lucide-angular';
+import { RTL_LANGUAGES, DEFAULT_LANGUAGE_CODE } from '../../../../core/constants/app.constants';
 
 
 @Component({
@@ -19,6 +20,8 @@ import { LucideAngularModule, Sparkles } from 'lucide-angular';
             name="storyText"
             [value]="text()" 
             (input)="onInput($event)"
+            [dir]="direction()"
+            [attr.aria-label]="'edit_text.placeholder' | translate"
             class="textarea textarea-bordered h-64 w-full text-lg leading-relaxed resize-none bg-orange-50/30 focus:outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100 rounded-2xl p-6"
             [placeholder]="'edit_text.placeholder' | translate">
           </textarea>
@@ -31,8 +34,8 @@ import { LucideAngularModule, Sparkles } from 'lucide-angular';
           </button>
 
           <!-- Start Learning Button -->
-          <button (click)="start.emit()" class="btn btn-gradient-primary flex-1 text-lg whitespace-nowrap">
-            <lucide-angular [img]="SparklesIcon" class="w-6 h-6 mr-2"></lucide-angular>
+          <button (click)="start.emit()" class="btn btn-gradient-primary flex-1 text-lg whitespace-nowrap gap-2">
+            <lucide-angular [img]="SparklesIcon" class="w-6 h-6"></lucide-angular>
             {{ 'edit_text.start_btn' | translate }}
           </button>
         </div>
@@ -44,6 +47,13 @@ import { LucideAngularModule, Sparkles } from 'lucide-angular';
 })
 export class EditText {
   text = input.required<string>();
+  languageCode = input<string>(DEFAULT_LANGUAGE_CODE);
+  
+  direction = computed(() => {
+    const lang = this.languageCode().split('-')[0].toLowerCase();
+    return RTL_LANGUAGES.includes(lang) ? 'rtl' : 'ltr';
+  });
+
   back = output<void>();
   textChange = output<string>();
   start = output<void>();

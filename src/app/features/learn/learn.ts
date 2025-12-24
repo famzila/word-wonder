@@ -16,7 +16,8 @@ import { PracticeControls } from './components/practice-controls/practice-contro
 import { WordDetailModal } from '../../shared/components/word-detail-modal/word-detail-modal';
 import { FeedbackModal } from './components/feedback-modal/feedback-modal.component';
 import { Word } from '../../shared/models/word.model';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { DEFAULT_LANGUAGE_CODE, DEFAULT_APP_LANGUAGE } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-learn',
@@ -41,6 +42,7 @@ export class Learn implements OnDestroy {
   private sttService = inject(SttService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private translate = inject(TranslateService);
 
   // Icons
   readonly VolumeIcon = Volume2;
@@ -73,7 +75,7 @@ export class Learn implements OnDestroy {
     effect(() => {
       const currentStory = this.storyStore.currentStory();
       if (currentStory?.content) {
-        this.store.setText(currentStory.content, currentStory.languageCode || 'en-US');
+        this.store.setText(currentStory.content, currentStory.languageCode || DEFAULT_LANGUAGE_CODE);
       }
     });
 
@@ -192,10 +194,7 @@ export class Learn implements OnDestroy {
 
   onSpeedChange(speed: number) {
     this.store.setPlaybackSpeed(speed);
-    // Also update the current audio if it exists
-    if (this.currentAudio) {
-      this.currentAudio.playbackRate = speed;
-    }
+    // Logic handled by effect in constructor
   }
 
   onPositionChange(wordIndex: number) {
@@ -225,10 +224,11 @@ export class Learn implements OnDestroy {
     };
     
     // Load AI definition and image
+    // Critical: Use text language for context, but APP language for definition output
     this.store.loadWordDetails(
       cleanWord, 
       this.store.text(), 
-      this.store.languageCode()
+      this.translate.currentLang || DEFAULT_APP_LANGUAGE // App language for definition (e.g. 'fr' or 'ar')
     );
 
     this.modalRef()?.open();

@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { DEFAULT_APP_LANGUAGE } from '../constants/app.constants';
 import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals';
 import { TranslateService } from '@ngx-translate/core';
 import { effect } from '@angular/core';
@@ -10,7 +11,7 @@ type SettingsState = {
 };
 
 const initialState: SettingsState = {
-  language: (localStorage.getItem('app-settings-lang') as Language) || 'en',
+  language: (localStorage.getItem('app-settings-lang') as Language) || DEFAULT_APP_LANGUAGE,
 };
 
 export const SettingsStore = signalStore(

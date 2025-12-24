@@ -8,6 +8,7 @@ import { PageHeader } from '../../shared/components/page-header/page-header';
 import { StoryStore } from '../../core/store/story.store';
 import { Story } from '../../shared/models/word.model';
 import { Router } from '@angular/router';
+import { DEFAULT_LANGUAGE_CODE } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-home',
@@ -24,7 +25,8 @@ import { Router } from '@angular/router';
 
       @if (viewMode === 'edit') {
         <app-edit-text 
-            [text]="store.currentStory()?.content || ''" 
+            [text]="store.currentStory()?.content || ''"
+            [languageCode]="store.currentStory()?.languageCode || DEFAULT_LANGUAGE_CODE"
             (textChange)="store.updateCurrentStoryText($event)"
             (back)="setViewMode('home')"
             (start)="startLearning()">
@@ -67,6 +69,7 @@ export class Home {
 
   // Other properties
   readonly SparklesIcon = Sparkles;
+  readonly DEFAULT_LANGUAGE_CODE = DEFAULT_LANGUAGE_CODE;
   viewMode: 'home' | 'edit' = 'home';
 
   constructor() {

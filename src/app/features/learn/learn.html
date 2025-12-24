@@ -42,6 +42,7 @@
   <!-- Content Card -->
   <app-text-display 
     [text]="store.text()" 
+    [languageCode]="store.languageCode()"
     [currentWordIndex]="store.currentWordIndex()"
     [mispronuncedWords]="store.mispronuncedWords()"
     (wordClick)="onWordClick($event)"

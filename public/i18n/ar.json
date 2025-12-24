@@ -1,7 +1,7 @@
 {
   "home": {
     "title": "عجائب الكلمات",
-    "subtitle": "تعلم التحدث كالنجم!",
+    "subtitle": "تعلم التحدث كالنجم",
     "upload_image": "تحميل صورة",
     "take_photo": "التقاط صورة",
     "section_stories": "أو جرب قصة",
@@ -29,13 +29,13 @@
   "edit_text": {
     "title": "تعديل النص",
     "placeholder": "أدخل نصك هنا...",
-    "start_btn": "ابدأ التعلم!"
+    "start_btn": "ابدأ التعلم"
   },
   "favorites": {
     "title": "قائمة كلماتي",
-    "subtitle": "الكلمات التي تتعلمها!",
+    "subtitle": "الكلمات التي تتعلمها",
     "saved_suffix": "كلمات محفوظة",
-    "empty_title": "لا توجد كلمات بعد!",
+    "empty_title": "لا توجد كلمات بعد",
     "empty_desc": "اذهب إلى قصة واضغط على أي كلمة لحفظها هنا.",
     "play_pronunciation": "تشغيل النطق",
     "remove_favorite": "إزالة من المفضلة"
@@ -74,7 +74,7 @@
       "start_recording": "بدء التسجيل",
       "stop_recording": "إيقاف التسجيل"
     },
-    "tap_instruction": "اضغط على أي كلمة لمعرفة المزيد عنها!",
+    "tap_instruction": "اضغط على أي كلمة لمعرفة المزيد عنها",
     "aria_learn_more": "اعرف المزيد عن {{word}}"
   },
   "stories": {
@@ -92,10 +92,10 @@
     }
   },
   "feedback": {
-    "amazing": "مذهل!",
-    "great_job": "عمل رائع!",
-    "good_effort": "جهد جيد!",
-    "keep_practicing": "استمر في التدريب!",
+    "amazing": "مذهل",
+    "great_job": "عمل رائع",
+    "good_effort": "جهد جيد",
+    "keep_practicing": "استمر في التدريب",
     "continue": "استمر"
   }
 }

@@ -4,6 +4,7 @@ import { Word } from '../../models/word.model';
 import { TtsService } from '../../../core/services/tts.service';
 import { FavoritesStore } from '../../../core/store/favorites.store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DEFAULT_LANGUAGE_CODE, RTL_LANGUAGES } from '../../../core/constants/app.constants';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -58,7 +59,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
             <!-- Syllables -->
             @if (word()?.syllables?.length) {
-              <div class="flex justify-center flex-wrap gap-2">
+              <div class="flex justify-center flex-wrap gap-2" [dir]="isWordRtl() ? 'rtl' : 'ltr'">
                   @for (syl of word()!.syllables; track $index) {
                     <span class="badge badge-lg badge-warning font-heading text-lg font-bold">
                       {{ syl }}
@@ -106,7 +107,7 @@ export class WordDetailModal {
   // 2. Queries/inputs/outputs next
   private modalRef = viewChild<ElementRef<HTMLDialogElement>>('modalRef');
   word = input<Word | null>(null);
-  languageCode = input<string>('en-US');
+  languageCode = input<string>(DEFAULT_LANGUAGE_CODE);
   
   // AI content inputs
   definition = input<string | null>(null);
@@ -120,6 +121,11 @@ export class WordDetailModal {
   favoriteId = computed(() => {
     const w = this.word();
     return w ? `${this.languageCode()}-${w.original.toLowerCase()}` : '';
+  });
+
+  isWordRtl = computed(() => {
+    const lang = this.languageCode().split('-')[0].toLowerCase();
+    return RTL_LANGUAGES.includes(lang);
   });
 
   isFavorite = computed(() => {

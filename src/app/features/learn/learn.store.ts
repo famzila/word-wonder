@@ -1,4 +1,5 @@
 import { patchState, signalStore, withComputed, withMethods, withState, withHooks } from '@ngrx/signals';
+import { DEFAULT_LANGUAGE_CODE } from '../../core/constants/app.constants';
 import { computed, inject, effect } from '@angular/core';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap, switchMap, map } from 'rxjs';
@@ -39,7 +40,7 @@ const initialState: LearnState = {
   playbackSpeed: 0.75,
   transcript: '',
   mispronuncedWords: [],
-  languageCode: 'en-US', // Default language
+  languageCode: DEFAULT_LANGUAGE_CODE, // Default language
   // Default text, will be overwritten by storage if available
   text: 'The fluffy cat sat on the warm mat. It was a sunny day and the cat was happy. The cat liked to play with the red ball.', 
   selectedWordDefinition: null,
@@ -108,12 +109,12 @@ export const LearnStore = signalStore(
       const imageService = inject(ImageService);
 
       return {
-          async loadWordDetails(word: string, context: string, lang: string) {
+          async loadWordDetails(word: string, context: string, definitionLanguage: string) {
               patchState(store, { isWordLoading: true, selectedWordDefinition: null, selectedWordImage: null });
               
               try {
                   // 1. Get Definition and Query
-                  const details = await geminiService.generateWordDetails(word, context, lang);
+                  const details = await geminiService.generateWordDetails(word, context, definitionLanguage);
                   patchState(store, { selectedWordDefinition: details.definition });
 
                   // 2. Get Image if query exists
@@ -127,7 +128,6 @@ export const LearnStore = signalStore(
                   }
 
               } catch (err) {
-                  console.error(err);
                   patchState(store, { 
                       isWordLoading: false, 
                       selectedWordDefinition: 'Definition unavailable.' 

@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { DEFAULT_LANGUAGE_CODE } from '../constants/app.constants';
 import { patchState, signalStore, withMethods, withState, withHooks } from '@ngrx/signals';
 import { Story } from '../../shared/models/word.model';
 import { OcrService } from '../services/ocr.service';
@@ -21,7 +22,7 @@ const initialState: StoryState = {
       content: 'stories.star.content',
       difficulty: 'easy',
       themeColor: 'bg-error/10 text-error',
-      languageCode: 'en-US'
+      languageCode: DEFAULT_LANGUAGE_CODE
     },
     {
       id: '2',
