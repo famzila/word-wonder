@@ -2,9 +2,11 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
 import { LucideAngularModule, Play, Pause, RotateCcw, Turtle, Rabbit } from 'lucide-angular';
 import { FormsModule } from '@angular/forms';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-player-controls',
-  imports: [LucideAngularModule, FormsModule],
+  imports: [LucideAngularModule, FormsModule, TranslatePipe],
   templateUrl: './player-controls.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
