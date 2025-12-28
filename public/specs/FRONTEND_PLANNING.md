@@ -169,11 +169,3 @@ We strictly separate **Smart Components** (Containers/Pages) and **Dumb Componen
 4.  **DaisyUI 5 Migration**:
     *   Use `@plugin "daisyui"` syntax.
     *   Ensure deprecated class names (if any from v4 habits) are not used.
-
----
-
-## 5. Next Steps for Implementation
-1.  Update `style.css` with the Theme Configuration.
-2.  Generate `HeroHeaderComponent` and `BottomNavComponent` to scaffold the shell.
-3.  Refactor `HomeComponent` to use the new dumb components.
-4.  Refactor `LearnComponent` to use the new dumb components.
